@@ -40,7 +40,7 @@ const AddAdmin = () => {
             <div className="col-md-2">
                <Sidebar></Sidebar>
             </div>
-            <div className="col-md-10 p-5 pr-5" style={{ backgroundColor: "#F4FDFB" }}>
+            <div className="col-md-8 p-5 pr-5" style={{ backgroundColor: "#F4FDFB" }}>
                 <h5 className="text-brand border-bottom">Add Admin</h5>
                 <form onSubmit ={handleSubmit}>
                     <div class="form-group">

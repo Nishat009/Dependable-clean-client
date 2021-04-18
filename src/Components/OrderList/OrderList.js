@@ -95,7 +95,7 @@ const OrderList = () => {
             <div className='col-md-2 p-0'>
                <Sidebar></Sidebar>
             </div>
-            <div className="col-md-10 p-4 mx-auto">
+            <div className="col-md-10 p-4 ">
                 <h2 className="ml-5 mb-5">Total Ordered List : {order.length}</h2>
                 <table class="table">
                     <thead>
