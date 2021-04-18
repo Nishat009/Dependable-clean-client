@@ -1,0 +1,7 @@
+.header-container{
+    height:800px;
+    position:relative;
+    background-size: cover;
+    background-image: url('../../../images/bg.jpg');
+    opacity: ".7"
+}

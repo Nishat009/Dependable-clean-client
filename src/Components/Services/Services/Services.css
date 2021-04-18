@@ -1,0 +1,20 @@
+.services .card{
+    border: 0;
+}
+.services .card-header{
+    border: 0;
+    background-color: transparent;
+}
+
+
+.services .card:hover{
+    background-image: linear-gradient(75deg, #19d3ae23,#0fceec57);
+    color: navy !important;
+    transition:  .1s  all ease-in-out !important;
+}
+.services .card:hover .card-body{
+    background-image: linear-gradient(90deg, #86ebe85b, #3A4256) ;
+    background-repeat: no-repeat;
+    background-position: right top;
+    background-size: 60%;
+}

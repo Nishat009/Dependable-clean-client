@@ -1,0 +1,9 @@
+.review-container{
+background-image: url('../../../images/reviewbg.jpg');
+    position:relative;
+    background-size: cover;
+    opacity: .8
+}
+.text{
+   color: black;
+}

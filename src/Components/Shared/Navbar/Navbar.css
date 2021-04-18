@@ -1,0 +1,14 @@
+.logo {
+    width: 60px;
+    height: 50px;
+}
+.nav-link {
+    transition: .25s all ease-in-out;
+}
+
+.nav-link:hover {
+    background-color:#3A4256;
+    border-radius: 10px;
+    box-shadow: 0 8px 6px -6px black;
+
+}
