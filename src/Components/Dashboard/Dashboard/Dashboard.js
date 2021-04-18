@@ -15,7 +15,7 @@ const Dashboard = () => {
     //     setSelectedDate(date); 
     // }
     // useEffect( () => {
-    //     fetch('http://localhost:5000/appointmentsByDate', {
+    //     fetch('https://young-wildwood-60700.herokuapp.com/appointmentsByDate', {
     //         method: 'POST',
     //         headers: { 'content-type': 'application/json'},
     //         body: JSON.stringify({date: selectedDate.toDateString(), email: loggedInUser.email})

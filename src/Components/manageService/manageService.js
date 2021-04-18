@@ -8,20 +8,20 @@ const ManageService = () => {
     const [service, setService] = useState([]);
     
     useEffect(() => {
-        fetch('http://localhost:5000/services')
+        fetch('https://young-wildwood-60700.herokuapp.com/services')
             .then(res => res.json())
             .then(data => setService(data))
     }, [])
 
     const deleted = () => {
-        fetch('http://localhost:5000/services')
+        fetch('https://young-wildwood-60700.herokuapp.com/services')
             .then(res => res.json())
             .then(data => setService(data))
     }
 
     const handleDelete = (id) => {
 
-        fetch(`http://localhost:5000/deleteClasses/${id}`, {
+        fetch(`https://young-wildwood-60700.herokuapp.com/deleteClasses/${id}`, {
             method: "DELETE"
         })
             .then(res => res.json())

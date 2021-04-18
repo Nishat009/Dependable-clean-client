@@ -17,7 +17,7 @@ const ServicesDetails = ({service}) => {
             {
             service.image ? <img style={{height: '200px', width: '17rem'}} src={`data:image/png;base64,${service.image.img}`}alt=""/>
             :
-            <img style={{height: '200px', width: '17rem'}} className="img-fluid mb-3 content" src={`http://localhost:5000/${service.img}`} alt=""/>
+            <img style={{height: '200px', width: '17rem'}} className="img-fluid mb-3 content" src={`https://young-wildwood-60700.herokuapp.com/${service.img}`} alt=""/>
         }
                 <h3 class="card-title ">{service.serviceName}</h3>
                 <small > {service.details}</small>

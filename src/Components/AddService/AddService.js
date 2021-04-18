@@ -25,7 +25,7 @@ const AddService = () => {
         formData.append('price', info.price);
         formData.append('details', info.details);
 
-        fetch('http://localhost:5000/addService', {
+        fetch('https://young-wildwood-60700.herokuapp.com/addService', {
             method: 'POST',
             body: formData
         })

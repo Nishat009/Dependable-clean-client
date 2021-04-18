@@ -7,14 +7,14 @@ const OrderList = () => {
     const [order, setOrder] = useState([]);
 
     useEffect(() => {
-        fetch('http://localhost:5000/orderList')
+        fetch('https://young-wildwood-60700.herokuapp.com/orderList')
             .then(res => res.json())
             .then(data => setOrder(data))
     }, [])
 
 
     const statusUpdated = () => {
-        fetch('http://localhost:5000/orderList')
+        fetch('https://young-wildwood-60700.herokuapp.com/orderList')
             .then(res => res.json())
             .then(data => setOrder(data))
     }
@@ -25,7 +25,7 @@ const OrderList = () => {
         const status = 'Pending'
         const user = { id, status };
 
-        const url = `http://localhost:5000/updateOrderList/${id}`;
+        const url = `https://young-wildwood-60700.herokuapp.com/updateOrderList/${id}`;
         fetch(url, {
             method: 'PATCH',
             headers: {
@@ -47,7 +47,7 @@ const OrderList = () => {
         const status = 'On going'
         const user = { id, status };
 
-        const url = `http://localhost:5000/updateOrderList/${id}`;
+        const url = `https://young-wildwood-60700.herokuapp.com/updateOrderList/${id}`;
         fetch(url, {
             method: 'PATCH',
             headers: {
@@ -70,7 +70,7 @@ const OrderList = () => {
         const status = 'Done'
         const user = { id, status };
 
-        const url = `http://localhost:5000/updateOrderList/${id}`;
+        const url = `https://young-wildwood-60700.herokuapp.com/updateOrderList/${id}`;
         fetch(url, {
             method: 'PATCH',
             headers: {

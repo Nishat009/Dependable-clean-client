@@ -16,7 +16,7 @@ const Book = () => {
 
     const { id } = useParams();
     useEffect(() => {
-        fetch(`http://localhost:5000/book/${id}`)
+        fetch(`https://young-wildwood-60700.herokuapp.com/book/${id}`)
             .then(res => res.json())
             .then(data => setBooking(data))
     }, [id])
@@ -37,7 +37,7 @@ const Book = () => {
         }
 
 
-        fetch('http://localhost:5000/addAllBook', {
+        fetch('https://young-wildwood-60700.herokuapp.com/addAllBook', {
             method: 'POST',
             headers: {
                 'content-type': 'application/json'

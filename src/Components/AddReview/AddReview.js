@@ -17,7 +17,7 @@ const AddReview = () => {
             userImg: loggedInUser.photoURL,
             comments: data.comments
         }
-        fetch('http://localhost:5000/addReview', {
+        fetch('https://young-wildwood-60700.herokuapp.com/addReview', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

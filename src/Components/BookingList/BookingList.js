@@ -9,7 +9,7 @@ const BookingList = () => {
     const [loggedInUser, setLoggedInUser] = useContext(UserContext)
 
     useEffect(() => {
-        fetch('http://localhost:5000/bookingList?email=' + loggedInUser.email)
+        fetch('https://young-wildwood-60700.herokuapp.com/bookingList?email=' + loggedInUser.email)
             .then(res => res.json())
             .then(data => setOrders(data))
     }, [loggedInUser.email])
