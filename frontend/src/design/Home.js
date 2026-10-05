@@ -5,7 +5,9 @@ import { useSelector } from 'react-redux';
 import Icon from './Icons';
 import { api } from './api';
 import { ButtonLink, Footer, Header, SectionIntro, ServiceCard } from './Layout';
-import { CountUp, Marquee } from './Motion';
+import { Carousel, CountUp, Marquee } from './Motion';
+import Product from './Products';
+import { offers } from './data';
 
 const steps = [
   { number: '01', title: 'Choose your clean', text: 'Pick the service that fits your space and the way you live.', icon: 'search' },
@@ -82,9 +84,9 @@ export default function Home() {
             <SectionIntro label="OUR SERVICES" title={<>A fresh feeling,<br /><em>for every space.</em></>} description="From the everyday reset to a deep, satisfying clean, find the care your space deserves." dark />
             <ButtonLink href="/book" outline>View all services</ButtonLink>
           </div>
-          <div className="service-grid" data-reveal="stagger">
-            {services.slice(0, 3).map((service, index) => <ServiceCard key={service._id} service={service} index={index} total={services.length} />)}
-          </div>
+          <Carousel label="Our services" className="service-carousel">
+            {services.map((service, index) => <ServiceCard key={service._id} service={service} index={index} total={services.length} />)}
+          </Carousel>
         </div>
       </section>
 
@@ -114,6 +116,22 @@ export default function Home() {
             <div className="steps-track" aria-hidden="true"><span className="steps-track-fill" /><span className="steps-track-dot" /></div>
             <div className="steps-grid">{steps.map((step) => <div className="step-card" key={step.number}><span className="step-number">{step.number}</span><div className="step-icon"><Icon name={step.icon} size={28} /></div><h3>{step.title}</h3><p>{step.text}</p></div>)}</div>
           </div>
+        </div>
+      </section>
+
+      <section className="section offers-section" id="offers">
+        <div className="wrap">
+          <div className="section-header-row" data-reveal>
+            <SectionIntro label="FRESH OFFERS" title={<>A little extra,<br /><em>for a fresher home.</em></>} description="Seasonal savings on the cleans our clients book most. Swipe through and pick yours." />
+          </div>
+          <Carousel label="Fresh offers" className="offer-carousel">
+            {offers.map((offer) => <article className="offer-card" key={offer.tag}>
+              <div className="offer-top"><span className="offer-chip"><Icon name="sparkle" size={13} /> Limited offer</span><span className="offer-tag">{offer.tag}</span></div>
+              <div className="offer-visual"><span className="offer-glow" aria-hidden="true" /><Product type={offer.product} /></div>
+              <p>{offer.text}</p>
+              <div className="offer-bottom"><strong className="offer-percent"><CountUp value={offer.percent} suffix="%" duration={1100} /><small>off</small></strong><Link className="offer-link" href={'/book/' + offer.serviceId} aria-label={'Claim ' + offer.tag + ' offer'}><Icon name="arrowUp" size={20} /></Link></div>
+            </article>)}
+          </Carousel>
         </div>
       </section>
 

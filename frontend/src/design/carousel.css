@@ -1,0 +1,53 @@
+/* Scroll-snap carousel (Motion.js Carousel) and the home page offer cards that ride on it. */
+.carousel{--per:3;--gap:20px;position:relative}
+.carousel-track{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - (var(--per) - 1) * var(--gap)) / var(--per));gap:var(--gap);overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scrollbar-width:none;padding:14px 4px 34px;margin:-14px -4px -34px;scroll-padding-inline:4px}
+.carousel-track::-webkit-scrollbar{display:none}
+.carousel-track:focus-visible{outline:2px solid #9cc63c;outline-offset:4px;border-radius:8px}
+.carousel-track>:nth-child(2){--i:1}.carousel-track>:nth-child(3){--i:2}.carousel-track>:nth-child(4){--i:3}.carousel-track>:nth-child(n+5){--i:4}
+.carousel-slide{scroll-snap-align:start;min-width:0;display:flex}
+.carousel-slide>*{flex:1;min-width:0}
+.carousel-slide .service-card{width:100%}
+.carousel-controls{display:flex;align-items:center;gap:12px;margin-top:34px}
+.carousel-progress{flex:1;height:2px;background:#cfd9c8;border-radius:2px;overflow:hidden;margin-right:12px}
+.carousel-progress span{display:block;height:100%;background:linear-gradient(90deg,#9cc63c,#d7fb60);transform-origin:left;transition:transform .45s var(--ease)}
+.carousel-arrow{width:50px;height:50px;flex:none;border-radius:50%;border:1px solid #b9c7b1;background:transparent;color:var(--ink);display:grid;place-items:center;transition:background .25s,border-color .25s,transform .25s,opacity .25s}
+.carousel-arrow:hover:not(:disabled){transform:translateY(-2px);border-color:var(--ink)}
+.carousel-arrow-next{background:var(--lime);border-color:var(--lime)}
+.carousel-arrow-next:hover:not(:disabled){border-color:var(--lime);box-shadow:0 10px 26px #d7fb6050}
+.carousel-arrow:disabled{opacity:.35;cursor:default}
+
+/* ---------- Offers ---------- */
+.offers-section{background:#0f1510;color:#fff;position:relative;overflow:hidden}
+.offers-section::before{content:'';position:absolute;width:640px;height:640px;left:-220px;top:-260px;border-radius:50%;background:#d7fb60;opacity:.06;filter:blur(90px);pointer-events:none}
+.offers-section .section-intro p{color:#aab5a6}
+.offers-section .carousel-progress{background:#ffffff1c}
+.offers-section .carousel-arrow{border-color:#ffffff30;color:#fff}
+.offers-section .carousel-arrow-next{color:var(--ink);border-color:var(--lime)}
+.offers-section .carousel-arrow:hover:not(:disabled){border-color:#fff}
+.offer-card{position:relative;display:flex;flex-direction:column;min-height:460px;padding:20px;border-radius:14px;border:1px solid #ffffff14;background:linear-gradient(165deg,#1f2a20 0%,#151c16 100%);overflow:hidden;transition:transform .4s var(--ease),border-color .4s,box-shadow .4s}
+.offer-card:hover{transform:translateY(-8px);border-color:#d7fb6055;box-shadow:0 26px 50px #0007}
+.offer-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.offer-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:100px;background:#d7fb601c;color:var(--lime);font-size:11px;font-weight:800}
+.offer-tag{font-size:11px;color:#93a18f;font-weight:700;text-align:right}
+.offer-visual{position:relative;height:220px;margin:18px 0 14px;display:flex;justify-content:center;align-items:flex-end}
+.offer-glow{position:absolute;left:50%;top:50%;width:190px;height:190px;translate:-50% -50%;border-radius:50%;background:radial-gradient(closest-side,#d7fb6033,transparent);transition:scale .6s var(--ease)}
+.offer-visual .product{position:relative;height:210px;filter:drop-shadow(0 22px 22px #0009);transition:transform .7s var(--ease)}
+.offer-card:hover .offer-visual .product{transform:translateY(-10px) rotate(-7deg) scale(1.05)}
+.offer-card:hover .offer-glow{scale:1.25}
+.offer-card p{color:#b6c1b2;font-size:14px;line-height:1.6;margin:0 0 18px;flex:1}
+.offer-bottom{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;border-top:1px solid #ffffff14;padding-top:16px}
+.offer-percent{display:flex;align-items:baseline;gap:6px;font:800 clamp(46px,4.6vw,62px)/1 Manrope,sans-serif;letter-spacing:-.06em;color:var(--lime)}
+.offer-percent small{font-size:14px;letter-spacing:0;color:#c7d2c3;font-weight:700}
+.offer-link{width:52px;height:52px;border-radius:50%;background:var(--lime);color:var(--ink);display:grid;place-items:center;flex:none;transition:transform .35s var(--ease)}
+.offer-link:hover{transform:rotate(45deg)}
+
+@media(max-width:1100px){
+  .carousel{--per:2}
+}
+@media(max-width:760px){
+  .carousel{--per:1.12;--gap:14px}
+  .carousel-arrow{width:44px;height:44px}
+  .offer-card{min-height:420px}
+  .offer-visual{height:190px}
+  .offer-visual .product{height:180px}
+}

@@ -61,6 +61,15 @@ export const demoServices = [
   },
 ];
 
+// Offer cards for the home page slider. Placeholder promotions: edit or remove before going live.
+export const offers = [
+  { product: 'spray', tag: 'First visit', percent: 20, text: 'Your first Signature Home Clean, with a little extra sparkle.', serviceId: '650000000000000000000001' },
+  { product: 'detergent', tag: 'Weekly plan', percent: 30, text: 'Book a weekly linen refresh and save on every visit.', serviceId: '650000000000000000000004' },
+  { product: 'dish', tag: 'Kitchen + bath', percent: 25, text: 'Pair a Kitchen Revival with a Bathroom Reset.', serviceId: '650000000000000000000002' },
+  { product: 'bucket', tag: 'Moving day', percent: 15, text: 'A full move-in reset before the boxes arrive.', serviceId: '650000000000000000000005' },
+  { product: 'pump', tag: 'Teams', percent: 18, text: 'A monthly office refresh for a workspace that stays crisp.', serviceId: '650000000000000000000006' },
+];
+
 export const serviceCategories = ['All services', 'Home care', 'Deep clean', 'Specialty'];
 
 export function formatMoney(value) {
