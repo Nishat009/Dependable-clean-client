@@ -46,7 +46,7 @@ export function Header() {
         <Link href="/#about">About us</Link>
         <Link href="/#process">Our process</Link>
         <Link href="/#contact">Contact</Link>
-        {user && <Link href="/dashboard" className="mobile-dashboard-link">Dashboard</Link>}
+        {user ? <Link href="/dashboard" className="mobile-dashboard-link">Dashboard</Link> : <Link href="/login" className="mobile-dashboard-link">Sign in</Link>}
       </nav>
       <div className="header-actions">
         {user ? <Link href="/dashboard" className="header-login"><Icon name="grid" size={17} /> Dashboard</Link>
