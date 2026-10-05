@@ -1,5 +1,6 @@
 import '../design/styles.css';
 import '../design/motion.css';
+import '../design/products.css';
 import AppProviders from '../legacy/Components/AppProviders';
 
 export default function App({ Component, pageProps }) {

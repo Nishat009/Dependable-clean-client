@@ -5,6 +5,7 @@ import Icon from './Icons';
 import { useAuth } from './Auth';
 import { api, jsonOptions } from './api';
 import { formatMoney } from './data';
+import Product, { productFor } from './Products';
 
 export function Brand({ compact = false }) {
   return <Link href="/" className={'brand' + (compact ? ' brand-compact' : '')} aria-label="Dependable Clean home">
@@ -89,12 +90,11 @@ export function SectionIntro({ label, title, description, dark = false }) {
 
 export function ServiceCard({ service, index = 0, total = 6 }) {
   const pad = (value) => String(value).padStart(2, '0');
-  const symbol = service.symbol || ['✳', '◈', '✦', '◎', '◇', '✧'][index % 6];
   return <Link href={'/book/' + service._id} className="service-card">
     <div className="service-card-top"><span className="service-index">{pad(index + 1)} / {pad(total)}</span><span className="service-card-arrow"><Icon name="arrowUp" size={20} /></span></div>
     <div className="service-visual" aria-hidden="true">
       <span className="service-visual-orbit orbit-one" /><span className="service-visual-orbit orbit-two" />
-      <span className="service-symbol">{symbol}</span>
+      <Product type={productFor(service, index)} className="service-product" />
       <span className="service-bubble bubble-one" /><span className="service-bubble bubble-two" />
     </div>
     <div className="service-card-content">
