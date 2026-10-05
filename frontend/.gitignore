@@ -1,0 +1,8 @@
+node_modules/
+.next/
+out/
+.env*.local
+*.log
+
+# design reference recordings, not used by the site
+public/visuals/*.mp4

@@ -1,54 +1,14 @@
 {
-  "name": "house-cleaning-client",
-  "version": "0.1.0",
+  "name": "dependable-clean",
+  "version": "1.0.0",
   "private": true,
-  "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^1.2.35",
-    "@fortawesome/free-brands-svg-icons": "^5.15.3",
-    "@fortawesome/free-regular-svg-icons": "^5.15.3",
-    "@fortawesome/free-solid-svg-icons": "^5.15.3",
-    "@fortawesome/react-fontawesome": "^0.1.14",
-    "@stripe/react-stripe-js": "^1.4.0",
-    "@stripe/stripe-js": "^1.13.2",
-    "@testing-library/jest-dom": "^5.11.10",
-    "@testing-library/react": "^11.2.6",
-    "@testing-library/user-event": "^12.8.3",
-    "bootstrap": "^4.6.0",
-    "firebase": "^8.4.1",
-    "react": "^17.0.2",
-    "react-bootstrap": "^1.5.2",
-    "react-dom": "^17.0.2",
-    "react-hook-form": "^7.1.0",
-    "react-router-dom": "^5.2.0",
-    "react-scripts": "4.0.3",
-    "react-slick": "^0.28.1",
-    "react-spring": "^9.1.1",
-    "slick-carousel": "^1.8.1",
-    "stripe": "^8.144.0",
-    "web-vitals": "^1.1.1"
-  },
+  "engines": { "node": ">=20.13.0" },
+  "workspaces": ["frontend", "backend"],
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "concurrently -k -n frontend,backend -c cyan,green \"npm --workspace @dependable-clean/client run dev\" \"npm --workspace @dependable-clean/server run dev\"",
+    "build": "npm run build --workspace @dependable-clean/client",
+    "start": "concurrently -k -n frontend,backend -c cyan,green \"npm --workspace @dependable-clean/client run start\" \"npm --workspace @dependable-clean/server run start\""
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
+  "devDependencies": { "concurrently": "^9.2.1" },
+  "overrides": { "@grpc/grpc-js": "^1.13.6" }
 }
