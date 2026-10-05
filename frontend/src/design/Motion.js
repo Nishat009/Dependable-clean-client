@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-const prefersReducedMotion = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+export const prefersReducedMotion = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // Watches every [data-reveal] element (including ones rendered later) and adds .is-visible once it scrolls into view.
 export function useRevealObserver(path) {
@@ -64,6 +64,51 @@ export function CountUp({ value, prefix = '', suffix = '', duration = 1400 }) {
   }, [target, duration]);
 
   return <span ref={ref} className="count-up">{prefix}{shown}{suffix}</span>;
+}
+
+// Scroll-snap slider with arrow buttons and a progress bar. Native swipe on touch screens.
+export function Carousel({ children, label, className = '', reveal = 'stagger' }) {
+  const track = useRef(null);
+  const [state, setState] = useState({ start: true, end: false, progress: 0 });
+
+  useEffect(() => {
+    const element = track.current;
+    if (!element) return undefined;
+    const update = () => {
+      const max = element.scrollWidth - element.clientWidth;
+      const left = element.scrollLeft;
+      setState({ start: left <= 2, end: left >= max - 2, progress: max > 0 ? left / max : 1 });
+    };
+    update();
+    element.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    return () => { element.removeEventListener('scroll', update); window.removeEventListener('resize', update); };
+  }, [children]);
+
+  const move = (direction) => {
+    const element = track.current;
+    const slide = element?.firstElementChild;
+    if (!slide) return;
+    const gap = parseFloat(getComputedStyle(element).columnGap) || 0;
+    element.scrollBy({ left: direction * (slide.getBoundingClientRect().width + gap), behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+  };
+
+  const items = React.Children.toArray(children);
+  return <div className={'carousel ' + className}>
+    <div className="carousel-track" ref={track} role="region" aria-label={label} tabIndex={0} data-reveal={reveal}
+      onKeyDown={(event) => { if (event.key === 'ArrowRight') { event.preventDefault(); move(1); } if (event.key === 'ArrowLeft') { event.preventDefault(); move(-1); } }}>
+      {items.map((child, index) => <div className="carousel-slide" key={child.key ?? index}>{child}</div>)}
+    </div>
+    <div className="carousel-controls">
+      <div className="carousel-progress" aria-hidden="true"><span style={{ transform: `scaleX(${Math.max(0.08, state.progress)})` }} /></div>
+      <button type="button" className="carousel-arrow" aria-label="Previous" disabled={state.start} onClick={() => move(-1)}><Arrow flip /></button>
+      <button type="button" className="carousel-arrow carousel-arrow-next" aria-label="Next" disabled={state.end} onClick={() => move(1)}><Arrow /></button>
+    </div>
+  </div>;
+}
+
+function Arrow({ flip = false }) {
+  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={flip ? { transform: 'scaleX(-1)' } : undefined}><path d="M4 12h15" /><path d="m13 5 7 7-7 7" /></svg>;
 }
 
 // Infinite horizontal ticker; content is rendered twice so the loop is seamless.

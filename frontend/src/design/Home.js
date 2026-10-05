@@ -5,7 +5,10 @@ import { useSelector } from 'react-redux';
 import Icon from './Icons';
 import { api } from './api';
 import { ButtonLink, Footer, Header, SectionIntro, ServiceCard } from './Layout';
-import { CountUp, Marquee } from './Motion';
+import { Carousel, CountUp, Marquee } from './Motion';
+import HeroSlider from './HeroSlider';
+import Product from './Products';
+import { offers } from './data';
 
 const steps = [
   { number: '01', title: 'Choose your clean', text: 'Pick the service that fits your space and the way you live.', icon: 'search' },
@@ -42,35 +45,14 @@ export default function Home() {
   return <>
     <Header />
     <main>
-      <section className="hero">
-        <div className="hero-bg">
-          <div className="hero-image" role="img" aria-label="Premium cleaning products, brush and freshly folded cloth on a spotless surface" />
-          <div className="hero-overlay" aria-hidden="true" />
-          <span className="hero-orb hero-orb-one" aria-hidden="true" /><span className="hero-orb hero-orb-two" aria-hidden="true" />
-        </div>
-        <div className="wrap hero-inner">
-          <div className="hero-copy">
-            <span className="eyebrow hero-eyebrow"><span className="eyebrow-dot" /> CLEANING, REIMAGINED</span>
-            <h1 className="hero-title">
-              <span className="line"><span>A cleaner</span></span>
-              <span className="line"><span>space. <em>A lighter</em></span></span>
-              <span className="line"><span>life<span className="hero-period">.</span></span></span>
-            </h1>
-            <p>Thoughtful care for the spaces that make life happen. Beautifully clean, effortlessly yours.</p>
-            <div className="hero-actions">
-              <ButtonLink href="/book">Explore services</ButtonLink>
-              <Link className="text-link" href="/#process">See how it works <Icon name="arrow" size={19} /></Link>
-            </div>
-            <div className="hero-proof"><span className="hero-proof-icon"><Icon name="sparkle" size={17} /></span><span>Made for real homes. Designed for peace of mind.</span></div>
-          </div>
-        </div>
+      <HeroSlider>
         <form className="quick-book wrap" onSubmit={handleQuickBook}>
           <div className="quick-book-intro"><span className="quick-book-icon"><Icon name="sparkle" size={24} /></span><div><strong>Book your fresh start</strong><small>Simple from the very first click</small></div></div>
           <label><span>SERVICE</span><select value={selected} onChange={(event) => setSelected(event.target.value)}><option value="">Choose a service</option>{services.map((service) => <option key={service._id} value={service._id}>{service.serviceName}</option>)}</select></label>
           <label><span>PREFERRED DATE</span><input aria-label="Preferred date" type="date" min={new Date().toISOString().slice(0, 10)} value={date} onChange={(event) => setDate(event.target.value)} /></label>
           <button className="button quick-book-submit" type="submit"><span>Find my clean</span><Icon name="arrowUp" size={18} /></button>
         </form>
-      </section>
+      </HeroSlider>
 
       <div className="value-strip">
         <Marquee items={values.map((value) => <><Icon name={value.icon} size={20} /> {value.label}</>)} />
@@ -82,9 +64,9 @@ export default function Home() {
             <SectionIntro label="OUR SERVICES" title={<>A fresh feeling,<br /><em>for every space.</em></>} description="From the everyday reset to a deep, satisfying clean, find the care your space deserves." dark />
             <ButtonLink href="/book" outline>View all services</ButtonLink>
           </div>
-          <div className="service-grid" data-reveal="stagger">
-            {services.slice(0, 3).map((service, index) => <ServiceCard key={service._id} service={service} index={index} total={services.length} />)}
-          </div>
+          <Carousel label="Our services" className="service-carousel">
+            {services.map((service, index) => <ServiceCard key={service._id} service={service} index={index} total={services.length} />)}
+          </Carousel>
         </div>
       </section>
 
@@ -114,6 +96,22 @@ export default function Home() {
             <div className="steps-track" aria-hidden="true"><span className="steps-track-fill" /><span className="steps-track-dot" /></div>
             <div className="steps-grid">{steps.map((step) => <div className="step-card" key={step.number}><span className="step-number">{step.number}</span><div className="step-icon"><Icon name={step.icon} size={28} /></div><h3>{step.title}</h3><p>{step.text}</p></div>)}</div>
           </div>
+        </div>
+      </section>
+
+      <section className="section offers-section" id="offers">
+        <div className="wrap">
+          <div className="section-header-row" data-reveal>
+            <SectionIntro label="FRESH OFFERS" title={<>A little extra,<br /><em>for a fresher home.</em></>} description="Seasonal savings on the cleans our clients book most. Swipe through and pick yours." />
+          </div>
+          <Carousel label="Fresh offers" className="offer-carousel">
+            {offers.map((offer) => <article className="offer-card" key={offer.tag}>
+              <div className="offer-top"><span className="offer-chip"><Icon name="sparkle" size={13} /> Limited offer</span><span className="offer-tag">{offer.tag}</span></div>
+              <div className="offer-visual"><span className="offer-glow" aria-hidden="true" /><Product type={offer.product} /></div>
+              <p>{offer.text}</p>
+              <div className="offer-bottom"><strong className="offer-percent"><CountUp value={offer.percent} suffix="%" duration={1100} /><small>off</small></strong><Link className="offer-link" href={'/book/' + offer.serviceId} aria-label={'Claim ' + offer.tag + ' offer'}><Icon name="arrowUp" size={20} /></Link></div>
+            </article>)}
+          </Carousel>
         </div>
       </section>
 

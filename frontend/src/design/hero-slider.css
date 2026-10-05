@@ -1,0 +1,105 @@
+/* Home hero product slider (HeroSlider.js). Arrow buttons reuse .carousel-arrow from carousel.css. */
+.flip-x{transform:scaleX(-1)}
+.hs{--accent:#d7fb60;position:relative;isolation:isolate;background:#0c110d;color:#fff;padding-top:94px;overflow-x:clip}
+.hs-bg{position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none;background:radial-gradient(70% 60% at 15% -10%,#24331f 0%,transparent 60%),linear-gradient(180deg,#0c110d 0%,#111713 100%)}
+.hs-grid{position:absolute;inset:0;background-image:linear-gradient(#ffffff08 1px,transparent 1px),linear-gradient(90deg,#ffffff08 1px,transparent 1px);background-size:64px 64px;-webkit-mask-image:radial-gradient(60% 70% at 70% 45%,#000,transparent 75%);mask-image:radial-gradient(60% 70% at 70% 45%,#000,transparent 75%)}
+.hs-glow{position:absolute;width:min(62vw,820px);aspect-ratio:1;right:-6%;top:50%;translate:0 -50%;border-radius:50%;background:var(--accent);opacity:.17;filter:blur(110px);transition:background-color 1.2s ease}
+.hs-inner{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);grid-template-areas:"head stage" "tabs stage" "stats stage" "actions stage";grid-template-rows:auto auto auto 1fr;column-gap:48px;padding:56px 0 150px;min-height:760px;align-content:center}
+.hs-head{grid-area:head}
+.hs-head h1{font-size:clamp(50px,5.4vw,90px);line-height:1;font-weight:800;margin:22px 0 22px}
+.hs-head h1 em{font-family:Georgia,serif;font-weight:400;font-style:italic;letter-spacing:-.075em;color:#b1dd43}
+.hs-head p{color:#c3cdbf;font-size:17px;line-height:1.65;max-width:440px;margin:0 0 30px;animation:reveal-up .9s var(--ease) .6s both}
+
+/* ---------- Tabs ---------- */
+.hs-tabs{grid-area:tabs;display:flex;gap:4px;width:fit-content;max-width:100%;padding:5px;border:1px solid #ffffff17;border-radius:100px;background:#ffffff0a;overflow-x:auto;scrollbar-width:none;animation:reveal-up .9s var(--ease) .72s both}
+.hs-tabs::-webkit-scrollbar{display:none}
+.hs-tab{position:relative;overflow:hidden;flex:none;border:0;border-radius:100px;background:transparent;color:#c6d0c2;padding:10px 17px;font-size:13px;font-weight:700;white-space:nowrap;transition:color .3s,background .35s var(--ease)}
+.hs-tab:hover{color:#fff}
+.hs-tab.is-active{background:var(--lime);color:var(--ink)}
+.hs-tab:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+.hs-tab-progress{position:absolute;left:14px;right:14px;bottom:5px;height:2px;border-radius:2px;background:#10171240;transform-origin:left;animation:tab-progress var(--autoplay) linear both}
+.hs.is-paused .hs-tab-progress{animation-play-state:paused}
+
+/* ---------- Stats and actions ---------- */
+.hs-stats{grid-area:stats;display:flex;gap:clamp(22px,3vw,44px);margin:30px 0 34px;animation:reveal-up .9s var(--ease) .84s both}
+.hs-stats dt{font-size:11px;font-weight:700;color:#93a18f;letter-spacing:.04em;margin-bottom:6px}
+.hs-stats dd{margin:0;font:800 clamp(24px,2.4vw,34px)/1.1 Manrope,sans-serif;letter-spacing:-.05em}
+.hs-roll{display:block;overflow:hidden}
+.hs-roll>span{display:block;animation:roll-in .75s var(--ease) both;animation-delay:calc(var(--i,0) * 90ms)}
+.hs-actions{grid-area:actions;display:flex;align-items:center;gap:28px;flex-wrap:wrap;align-self:start;animation:reveal-up .9s var(--ease) .96s both}
+
+/* ---------- Product stage ---------- */
+.hs-stage{grid-area:stage;position:relative;min-height:540px;touch-action:pan-y;animation:fade-in 1.2s ease .2s both}
+.hs-ring{position:absolute;left:50%;top:47%;translate:-50% -50%;border-radius:50%;border:1px solid #ffffff14;pointer-events:none}
+.hs-ring-one{width:min(88%,470px);aspect-ratio:1;animation:spin-soft 40s linear infinite}
+.hs-ring-one::after{content:'';position:absolute;top:50%;left:-5px;width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 18px var(--accent);transition:background-color 1s}
+.hs-ring-two{width:min(64%,340px);aspect-ratio:1;border-style:dashed;border-color:#ffffff10;animation:spin-soft 60s linear infinite reverse}
+.hs-floor{position:absolute;left:50%;bottom:9%;width:min(70%,380px);height:46px;translate:-50% 0;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--accent) 35%,transparent),transparent);transition:background 1s}
+.hs-slide{position:absolute;inset:4% 0 10%;display:flex;align-items:flex-end;justify-content:center;opacity:0;visibility:hidden;pointer-events:none}
+.hs-slide .product{height:min(100%,470px);filter:drop-shadow(0 40px 45px #000a)}
+.hs-slide.is-active{visibility:visible;opacity:1;animation:product-in 1s var(--ease) both}
+.hs-slide.is-active .product{animation:product-float 6s ease-in-out 1s infinite}
+.hs-slide.is-leaving{visibility:visible;animation:product-out .75s var(--ease) both}
+.hs-bubbles{position:absolute;inset:0;pointer-events:none}
+.hs-bubbles i{position:absolute;bottom:18%;width:14px;height:14px;border-radius:50%;border:1px solid #ffffff55;background:radial-gradient(circle at 30% 30%,#ffffff70,#ffffff08 60%);animation:bubble-rise 7s ease-in infinite}
+.hs-bubbles i:nth-child(1){left:24%;animation-delay:0s}
+.hs-bubbles i:nth-child(2){left:70%;width:9px;height:9px;animation-delay:-2.2s}
+.hs-bubbles i:nth-child(3){left:38%;width:22px;height:22px;animation-delay:-4s}
+.hs-bubbles i:nth-child(4){left:80%;width:16px;height:16px;animation-delay:-5.4s}
+.hs-bubbles i:nth-child(5){left:56%;width:7px;height:7px;animation-delay:-1.1s}
+.hs-caption{position:absolute;top:5%;right:0;display:flex;align-items:center;gap:11px;padding:10px 16px 10px 12px;border:1px solid #ffffff17;border-radius:12px;background:#151d17b8;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);animation:reveal-up .7s var(--ease) .15s both}
+.hs-caption small,.hs-caption strong{display:block}
+.hs-caption small{font-size:10px;color:#93a18f;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+.hs-caption strong{font-size:13px;margin-top:3px;text-transform:capitalize}
+.hs-caption-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 25%,transparent);flex:none}
+.hs-nav{position:absolute;right:0;bottom:0;display:flex;align-items:center;gap:10px}
+.hs-count{font-size:12px;color:#93a18f;margin-right:8px;font-variant-numeric:tabular-nums}
+.hs-count strong{color:#fff;font-size:15px}
+.hs-arrow{border-color:#ffffff30;color:#fff}
+.hs-arrow.carousel-arrow-next{color:var(--ink)}
+.hs-arrow:hover:not(:disabled){border-color:#fff}
+.hs .quick-book{margin-top:-96px}
+
+@keyframes product-in{from{opacity:0;transform:translateX(calc(var(--dir,1) * 55%)) rotate(calc(var(--dir,1) * 9deg)) scale(.86);filter:blur(16px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes product-out{from{opacity:1;transform:none;filter:blur(0)}to{opacity:0;transform:translateX(calc(var(--dir,1) * -55%)) rotate(calc(var(--dir,1) * -9deg)) scale(.86);filter:blur(16px)}}
+@keyframes roll-in{from{translate:0 105%;opacity:0}to{translate:0 0;opacity:1}}
+@keyframes tab-progress{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes bubble-rise{0%{opacity:0;transform:translateY(0) scale(.6)}15%{opacity:1}100%{opacity:0;transform:translateY(-380px) scale(1.1)}}
+
+@media(max-width:1100px){
+  .hs-inner{column-gap:28px;min-height:700px}
+  .hs-stage{min-height:480px}
+}
+@media(max-width:900px){
+  .hs-inner{grid-template-columns:minmax(0,1fr);grid-template-areas:"head" "stage" "tabs" "stats" "actions";grid-template-rows:none;min-height:0;padding:36px 0 130px}
+  .hs-head p{margin-bottom:6px}
+  .hs-stage{min-height:420px;margin:6px 0 22px}
+  .hs-glow{width:110vw;right:-30%;top:45%}
+}
+@media(max-width:760px){
+  .hs{padding-top:72px}
+  .hs-inner{padding:26px 0 40px}
+  .hs-head h1{font-size:clamp(44px,12.5vw,66px);margin:18px 0 16px}
+  .hs-head p{font-size:15px}
+  .hs-stage{min-height:340px;margin-bottom:18px}
+  .hs-slide{inset:8% 0 13%}
+  .hs-caption{top:0;right:auto;left:0;padding:8px 12px 8px 10px}
+  .hs-caption strong{font-size:12px}
+  .hs-nav{bottom:-4px}
+  .hs-nav .hs-arrow{width:42px;height:42px}
+  .hs-tabs{width:auto;justify-self:stretch}
+  .hs-stats{justify-content:space-between;gap:14px;margin:24px 0 26px}
+  .hs-stats dd{font-size:24px}
+  .hs-actions{gap:20px}
+  .hs .quick-book{margin-top:0}
+}
+@media(max-width:420px){
+  .hs-tab{padding:9px 13px}
+  .hs-stats dt{font-size:10px}
+  .hs-stats dd{font-size:21px}
+  .hs-actions .button{width:100%}
+}
+@media(prefers-reduced-motion:reduce){
+  .hs-slide.is-leaving{visibility:hidden}
+  .hs-bubbles{display:none}
+}
