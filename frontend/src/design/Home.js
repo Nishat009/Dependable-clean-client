@@ -6,6 +6,7 @@ import Icon from './Icons';
 import { api } from './api';
 import { ButtonLink, Footer, Header, SectionIntro, ServiceCard } from './Layout';
 import { Carousel, CountUp, Marquee } from './Motion';
+import HeroSlider from './HeroSlider';
 import Product from './Products';
 import { offers } from './data';
 
@@ -44,35 +45,14 @@ export default function Home() {
   return <>
     <Header />
     <main>
-      <section className="hero">
-        <div className="hero-bg">
-          <div className="hero-image" role="img" aria-label="Premium cleaning products, brush and freshly folded cloth on a spotless surface" />
-          <div className="hero-overlay" aria-hidden="true" />
-          <span className="hero-orb hero-orb-one" aria-hidden="true" /><span className="hero-orb hero-orb-two" aria-hidden="true" />
-        </div>
-        <div className="wrap hero-inner">
-          <div className="hero-copy">
-            <span className="eyebrow hero-eyebrow"><span className="eyebrow-dot" /> CLEANING, REIMAGINED</span>
-            <h1 className="hero-title">
-              <span className="line"><span>A cleaner</span></span>
-              <span className="line"><span>space. <em>A lighter</em></span></span>
-              <span className="line"><span>life<span className="hero-period">.</span></span></span>
-            </h1>
-            <p>Thoughtful care for the spaces that make life happen. Beautifully clean, effortlessly yours.</p>
-            <div className="hero-actions">
-              <ButtonLink href="/book">Explore services</ButtonLink>
-              <Link className="text-link" href="/#process">See how it works <Icon name="arrow" size={19} /></Link>
-            </div>
-            <div className="hero-proof"><span className="hero-proof-icon"><Icon name="sparkle" size={17} /></span><span>Made for real homes. Designed for peace of mind.</span></div>
-          </div>
-        </div>
+      <HeroSlider>
         <form className="quick-book wrap" onSubmit={handleQuickBook}>
           <div className="quick-book-intro"><span className="quick-book-icon"><Icon name="sparkle" size={24} /></span><div><strong>Book your fresh start</strong><small>Simple from the very first click</small></div></div>
           <label><span>SERVICE</span><select value={selected} onChange={(event) => setSelected(event.target.value)}><option value="">Choose a service</option>{services.map((service) => <option key={service._id} value={service._id}>{service.serviceName}</option>)}</select></label>
           <label><span>PREFERRED DATE</span><input aria-label="Preferred date" type="date" min={new Date().toISOString().slice(0, 10)} value={date} onChange={(event) => setDate(event.target.value)} /></label>
           <button className="button quick-book-submit" type="submit"><span>Find my clean</span><Icon name="arrowUp" size={18} /></button>
         </form>
-      </section>
+      </HeroSlider>
 
       <div className="value-strip">
         <Marquee items={values.map((value) => <><Icon name={value.icon} size={20} /> {value.label}</>)} />

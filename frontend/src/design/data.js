@@ -61,6 +61,16 @@ export const demoServices = [
   },
 ];
 
+// Hero slider: one cleaning product per service. Price and duration come from the live service when it exists.
+export const heroSlides = [
+  { product: 'spray', tab: 'Everyday', name: 'Citrus multi-surface spray', serviceId: '650000000000000000000001', accent: '#d7fb60', stat: ['40+', 'Surfaces refreshed'] },
+  { product: 'dish', tab: 'Kitchen', name: 'Lime degreasing gel', serviceId: '650000000000000000000002', accent: '#9fdc45', stat: ['12', 'Kitchen zones'] },
+  { product: 'bath', tab: 'Bathroom', name: 'Aqua tile & glass gel', serviceId: '650000000000000000000003', accent: '#7fe0d0', stat: ['100%', 'Fixtures polished'] },
+  { product: 'detergent', tab: 'Laundry', name: 'Fresh linen detergent', serviceId: '650000000000000000000004', accent: '#e9f5b8', stat: ['6', 'Linen care steps'] },
+  { product: 'bucket', tab: 'Deep clean', name: 'Deep reset kit', serviceId: '650000000000000000000005', accent: '#c4ec4f', stat: ['9', 'Rooms covered'] },
+  { product: 'pump', tab: 'Office', name: 'Botanical foam soap', serviceId: '650000000000000000000006', accent: '#f1cf7a', stat: ['30+', 'Touchpoints wiped'] },
+];
+
 // Offer cards for the home page slider. Placeholder promotions: edit or remove before going live.
 export const offers = [
   { product: 'spray', tag: 'First visit', percent: 20, text: 'Your first Signature Home Clean, with a little extra sparkle.', serviceId: '650000000000000000000001' },
