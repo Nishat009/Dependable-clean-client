@@ -1,59 +1,43 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { api, jsonOptions, readSession, storeSession } from './api';
 
 const AuthContext = createContext(null);
-const storageKey = 'dependable-clean-user';
 
-function readStoredUser() {
-  try {
-    const stored = JSON.parse(localStorage.getItem(storageKey) || 'null');
-    return stored && stored.email ? stored : null;
-  } catch {
-    return null;
-  }
-}
-
-function storeUser(user) {
-  try {
-    if (user) localStorage.setItem(storageKey, JSON.stringify(user));
-    else localStorage.removeItem(storageKey);
-  } catch {
-    // The session still works for this page view when storage is blocked.
-  }
-}
-
-// Sign-in is by name and email only, kept in the browser, until a real auth provider is added back.
+// The API checks the email and password and returns a signed token, which is kept in the browser.
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    setUser(readStoredUser());
+    const session = readSession();
+    setUser(session?.user || null);
     setReady(true);
+    if (!session) return;
+    // Refresh the role in case an admin was added or removed since the last visit.
+    api('/me').then((fresh) => {
+      storeSession({ ...session, user: fresh });
+      setUser(fresh);
+    }).catch((error) => {
+      if (error.status === 401) { storeSession(null); setUser(null); }
+    });
   }, []);
 
-  function signIn({ name, email }) {
-    const nextUser = { name: name.trim() || 'Welcome back', email: email.trim().toLowerCase() };
-    storeUser(nextUser);
-    setUser(nextUser);
-    return nextUser;
+  function begin(session) {
+    storeSession(session);
+    setUser(session.user);
+    return session.user;
   }
 
-  function signInDemo(role) {
-    if (process.env.NODE_ENV !== 'development') return;
-    const nextUser = role === 'admin'
-      ? { name: 'Alex Morgan', email: 'admin@dependableclean.demo', role: 'admin', demo: true }
-      : { name: 'Jamie Rivera', email: 'guest@dependableclean.demo', role: 'customer', demo: true };
-    storeUser(nextUser);
-    setUser(nextUser);
-    return nextUser;
-  }
+  const signIn = ({ email, password }) => api('/login', jsonOptions('POST', { email, password })).then(begin);
+  const signUp = ({ name, email, password }) => api('/signup', jsonOptions('POST', { name, email, password })).then(begin);
+  const signInDemo = (role) => api('/demoLogin', jsonOptions('POST', { role })).then(begin);
 
   async function signOut() {
-    storeUser(null);
+    storeSession(null);
     setUser(null);
   }
 
-  return <AuthContext.Provider value={{ user, ready, signIn, signInDemo, signOut }}>
+  return <AuthContext.Provider value={{ user, ready, signIn, signUp, signInDemo, signOut }}>
     {children}
   </AuthContext.Provider>;
 }

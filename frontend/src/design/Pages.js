@@ -25,18 +25,27 @@ function useRemote(path, fallback = []) {
 
 export function LoginPage() {
   const router = useRouter();
-  const { user, signIn, signInDemo } = useAuth();
+  const { user, signIn, signUp, signInDemo } = useAuth();
+  const [mode, setMode] = useState('signin');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [busy, setBusy] = useState('');
+  const [error, setError] = useState('');
   const destination = typeof router.query.from === 'string' && router.query.from.startsWith('/') ? router.query.from : '/dashboard';
+  const signingUp = mode === 'signup';
+  useEffect(() => { if (router.query.mode === 'signup') setMode('signup'); }, [router.query.mode]);
   useEffect(() => { if (user) router.replace(destination); }, [user, destination, router]);
+  async function run(action, key) {
+    setBusy(key); setError('');
+    try { await action(); } catch (cause) { setError(cause.message); setBusy(''); }
+  }
   function submit(event) {
     event.preventDefault();
-    signIn({ name, email });
-    router.push(destination);
+    run(() => signingUp ? signUp({ name, email, password }) : signIn({ email, password }), 'form');
   }
-  function demoLogin(role) { signInDemo(role); router.push(destination); }
-  return <><Header /><main className="auth-page"><div className="auth-art"><div className="auth-art-content"><span className="eyebrow"><span className="eyebrow-dot" /> YOUR FRESH START</span><h1>Good things happen in <em>clean spaces.</em></h1><p>Step into a simpler way to care for your space.</p><div className="auth-orbit"><Icon name="sparkle" size={75} /></div></div></div><div className="auth-form-side"><div className="auth-card"><span className="eyebrow"><span className="eyebrow-dot" /> WELCOME BACK</span><h2>Make yourself<br /><em>at home.</em></h2><p>Sign in to book a service and keep track of your fresh starts.</p><form onSubmit={submit} className="stack-form"><label>Your name<input required autoComplete="name" placeholder="Jamie Rivera" value={name} onChange={(event) => setName(event.target.value)} /></label><label>Email address<input required type="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={(event) => setEmail(event.target.value)} /></label><button className="button auth-primary" type="submit"><span>Continue</span><Icon name="arrowUp" size={19} /></button></form>{process.env.NODE_ENV === 'development' && <div className="demo-login"><span>LOCAL PREVIEW</span><button type="button" onClick={() => demoLogin('customer')}>Enter as a customer <Icon name="arrow" size={17} /></button><button type="button" onClick={() => demoLogin('admin')}>Enter as an admin <Icon name="arrow" size={17} /></button></div>}<small>By continuing, you can manage your bookings from one beautiful place.</small></div></div></main><Footer /></>;
+  function switchMode(next) { setMode(next); setError(''); }
+  return <><Header /><main className="auth-page"><div className="auth-art"><div className="auth-art-content"><span className="eyebrow"><span className="eyebrow-dot" /> YOUR FRESH START</span><h1>Good things happen in <em>clean spaces.</em></h1><p>Step into a simpler way to care for your space.</p><div className="auth-orbit"><Icon name="sparkle" size={75} /></div></div></div><div className="auth-form-side"><div className="auth-card"><span className="eyebrow"><span className="eyebrow-dot" /> {signingUp ? 'NEW HERE' : 'WELCOME BACK'}</span><h2>{signingUp ? <>Create your<br /><em>account.</em></> : <>Make yourself<br /><em>at home.</em></>}</h2><p>{signingUp ? 'Join in a few seconds to book a service and keep track of your fresh starts.' : 'Sign in to book a service and keep track of your fresh starts.'}</p><div className="auth-tabs" role="tablist" aria-label="Sign in or create an account"><button type="button" role="tab" aria-selected={!signingUp} className={signingUp ? '' : 'active'} onClick={() => switchMode('signin')}>Sign in</button><button type="button" role="tab" aria-selected={signingUp} className={signingUp ? 'active' : ''} onClick={() => switchMode('signup')}>Create account</button></div><Notice message={error} type="error" onClose={() => setError('')} /><form onSubmit={submit} className="stack-form" key={mode}>{signingUp && <label>Your name<input required autoComplete="name" placeholder="Jamie Rivera" value={name} onChange={(event) => setName(event.target.value)} /></label>}<label>Email address<input required type="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={(event) => setEmail(event.target.value)} /></label><label>Password<input required type="password" minLength={6} autoComplete={signingUp ? 'new-password' : 'current-password'} placeholder={signingUp ? 'At least 6 characters' : 'Your password'} value={password} onChange={(event) => setPassword(event.target.value)} /></label><button className="button auth-primary" type="submit" disabled={Boolean(busy)}><span>{busy === 'form' ? (signingUp ? 'Creating your account…' : 'Signing you in…') : (signingUp ? 'Create account' : 'Sign in')}</span><Icon name="arrowUp" size={19} /></button></form><p className="auth-switch">{signingUp ? 'Already have an account? ' : 'New to Dependable Clean? '}<button type="button" onClick={() => switchMode(signingUp ? 'signin' : 'signup')}>{signingUp ? 'Sign in' : 'Create an account'}</button></p><div className="demo-login"><span>TRY A DEMO ACCOUNT</span><button type="button" disabled={Boolean(busy)} onClick={() => run(() => signInDemo('customer'), 'customer')}>{busy === 'customer' ? 'Opening the customer demo…' : 'Demo customer'} <Icon name="arrow" size={17} /></button><button type="button" disabled={Boolean(busy)} onClick={() => run(() => signInDemo('admin'), 'admin')}>{busy === 'admin' ? 'Opening the admin demo…' : 'Demo admin'} <Icon name="arrow" size={17} /></button></div><small>By continuing, you can manage your bookings from one beautiful place.</small></div></div></main><Footer /></>;
 }
 
 export function ServicesPage() {

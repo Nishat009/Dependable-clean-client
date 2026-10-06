@@ -29,8 +29,10 @@ function Routes({ initialPath }) {
     if (typeof window !== 'undefined') router.replace('/login?from=' + encodeURIComponent(path));
     page = <><Header /><main className="loading-screen">Taking you to sign in…</main></>;
   } else {
-    const pages = { '/dashboard': <DashboardPage />, '/bookList': <BookingsPage />, '/addReview': <ReviewPage />, '/orderList': <OrdersPage />, '/addService': <AddServicePage />, '/addManage': <ManagePage />, '/addAdmin': <AddAdminPage /> };
-    page = pages[path] || <Home />;
+    const pages = { '/dashboard': <DashboardPage />, '/bookList': <BookingsPage />, '/addReview': <ReviewPage /> };
+    const adminPages = { '/orderList': <OrdersPage />, '/addService': <AddServicePage />, '/addManage': <ManagePage />, '/addAdmin': <AddAdminPage /> };
+    if (adminPages[path]) page = user.role === 'admin' ? adminPages[path] : <DashboardPage />;
+    else page = pages[path] || <Home />;
   }
   return <><Head><title>Dependable Clean — A fresh feeling for every space</title><meta name="description" content="Thoughtful cleaning services for spaces worth living in. Explore, book and manage your clean." /><meta name="viewport" content="width=device-width, initial-scale=1" /></Head>{page}</>;
 }

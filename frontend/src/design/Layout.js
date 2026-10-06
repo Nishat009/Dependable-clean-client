@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Icon from './Icons';
 import { useAuth } from './Auth';
-import { api, jsonOptions } from './api';
 import { formatMoney } from './data';
 import Product, { productFor } from './Products';
 
@@ -132,7 +131,7 @@ export function EmptyState({ title, text, href, action }) {
 export function DashboardLayout({ title, eyebrow = 'Your space', description, children }) {
   const { user, signOut } = useAuth();
   const router = useRouter();
-  const [isAdmin, setIsAdmin] = useState(user?.role === 'admin');
+  const isAdmin = user?.role === 'admin';
   const links = [
     { href: '/dashboard', label: 'Overview', icon: 'grid' },
     { href: '/book', label: 'Explore services', icon: 'sparkle' },
@@ -145,15 +144,6 @@ export function DashboardLayout({ title, eyebrow = 'Your space', description, ch
     { href: '/addManage', label: 'Manage services', icon: 'grid' },
     { href: '/addAdmin', label: 'Add admin', icon: 'user' },
   ];
-
-  useEffect(() => {
-    if (!user?.email) return;
-    let active = true;
-    api('/isAdmin', jsonOptions('POST', { email: user.email }))
-      .then((value) => { if (active) setIsAdmin(Boolean(value)); })
-      .catch(() => { if (active) setIsAdmin(user.role === 'admin'); });
-    return () => { active = false; };
-  }, [user?.email, user?.role]);
 
   return <div className="dashboard-page">
     <Header />
@@ -176,7 +166,7 @@ export function DashboardLayout({ title, eyebrow = 'Your space', description, ch
         </div>
       </aside>
       <main className="dashboard-main" key={router.asPath.split('?')[0]}>
-        {user?.demo && <div className="demo-banner"><Icon name="sparkle" size={16} /> Local preview · Changes reset when the server restarts</div>}
+        {user?.demo && <div className="demo-banner"><Icon name="sparkle" size={16} /> Demo account · Anyone can use it, so please keep it to test data</div>}
         <div className="dashboard-heading"><span className="eyebrow"><span className="eyebrow-dot" />{eyebrow}</span><h1>{title}</h1>{description && <p>{description}</p>}</div>
         {children}
       </main>
