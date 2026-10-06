@@ -18,3 +18,5 @@ services:
         sync: false
       - key: CLIENT_ORIGIN
         sync: false
+      - key: AUTH_SECRET
+        generateValue: true
