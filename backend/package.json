@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "node --watch index.js",
     "start-dev": "node --watch index.js",
-    "start": "node index.js"
+    "start": "node index.js",
+    "build": "node --check index.js && node --check sampleData.js",
+    "seed": "node seed.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
