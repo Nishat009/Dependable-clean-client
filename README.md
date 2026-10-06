@@ -1,5 +1,7 @@
 # Dependable Clean
 
+Live website: [Dependable Clean](https://dependable-clean-client.vercel.app/)
+
 This is the combined Dependable Clean repository. It contains the Next.js app in `frontend/` and the Express API in `backend/`. The redesigned frontend lives in `frontend/src/design`; the previous UI is retained under `frontend/src/legacy` for reference.
 
 ## Run both applications
