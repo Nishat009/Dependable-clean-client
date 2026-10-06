@@ -18,7 +18,9 @@ const mongoUri = process.env.MONGODB_URI || (process.env.DB_USER && process.env.
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false }));
-app.use(cors({ origin: process.env.CLIENT_ORIGIN || 'http://localhost:3000' }));
+// CLIENT_ORIGIN can list several sites, separated by commas, such as the Vercel URL and localhost.
+const clientOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:3000').split(',').map((origin) => origin.trim().replace(/\/$/, '')).filter(Boolean);
+app.use(cors({ origin: clientOrigins }));
 app.use(fileUpload());
 // Express 5 leaves req.body undefined when a request has no body.
 app.use((req, _res, next) => { req.body ??= {}; next(); });
