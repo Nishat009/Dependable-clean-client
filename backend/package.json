@@ -7,7 +7,7 @@
     "dev": "node --watch index.js",
     "start-dev": "node --watch index.js",
     "start": "node index.js",
-    "build": "node --check index.js && node --check auth.js && node --check sampleData.js",
+    "build": "node --check index.js && node --check auth.js && node --check demoDb.js && node --check validation.js && node --check sampleData.js && node --check seed.js",
     "seed": "node seed.js"
   },
   "dependencies": {

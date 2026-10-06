@@ -4,5 +4,5 @@ import { Html, Head, Main, NextScript } from 'next/document';
 const motionFlag = "document.documentElement.classList.add('motion-ready')";
 
 export default function Document() {
-  return <Html lang="en"><Head><script dangerouslySetInnerHTML={{ __html: motionFlag }} /></Head><body><Main /><NextScript /></body></Html>;
+  return <Html lang="en" data-scroll-behavior="smooth"><Head><script dangerouslySetInnerHTML={{ __html: motionFlag }} /></Head><body><Main /><NextScript /></body></Html>;
 }

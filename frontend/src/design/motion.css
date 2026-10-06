@@ -2,9 +2,9 @@
 :root{--ease:cubic-bezier(.2,.75,.15,1)}
 
 /* ---------- Header states ---------- */
+/* The header is rendered once and stays fixed; scrolling only fades its background in, so it never replays an entrance. */
 .site-header-solid{background:#111713}
 .site-header{animation:header-drop .9s var(--ease) both}
-.site-header.is-scrolled{animation:header-slide .5s var(--ease) both}
 
 /* ---------- Buttons ---------- */
 .button{position:relative;overflow:hidden;isolation:isolate}
@@ -57,9 +57,6 @@
 :is(.service-grid,.about-points,.about-stats,.review-stack,.steps-grid,.catalog-grid,.page-hero,.booking-copy,.auth-art-content,.auth-card,.dashboard-main,.booking-list,.admin-list,.stat-grid,.stack-form)>:nth-child(n+7){--i:6}
 
 /* ---------- Services ---------- */
-.service-visual-orbit{transition:transform 1s var(--ease)}
-.service-card:hover .orbit-one{transform:rotate(-70deg) scaleX(1.5)}
-.service-card:hover .orbit-two{transform:rotate(80deg) scaleX(.85)}
 .service-card-arrow svg{transition:transform .4s var(--ease)}
 .service-card:hover .service-card-arrow svg{transform:rotate(45deg)}
 .catalog-grid>*{animation:reveal-up .75s var(--ease) both;animation-delay:calc(var(--i,0) * 80ms)}
@@ -123,7 +120,6 @@
 @keyframes fade-in{from{opacity:0}to{opacity:1}}
 @keyframes hero-zoom{from{scale:1.14}to{scale:1}}
 @keyframes header-drop{from{opacity:0;translate:0 -30px}to{opacity:1;translate:0 0}}
-@keyframes header-slide{from{translate:0 -100%}to{translate:0 0}}
 @keyframes marquee{to{transform:translateX(-50%)}}
 @keyframes clip-in{from{clip-path:inset(100% 0 0 0);scale:1.18}to{clip-path:inset(0 0 0 0);scale:1}}
 @keyframes stamp-pop{from{opacity:0;scale:.2}to{opacity:1;scale:1}}
@@ -145,6 +141,6 @@
   .site-header-solid .main-nav{background:#111713}
 }
 @media(prefers-reduced-motion:reduce){
-  .marquee-track,.about-image-stamp,.hero-proof-icon::after,.hero-orb,.service-bubble{animation:none!important}
+  .marquee-track,.about-image-stamp,.hero-proof-icon::after,.hero-orb{animation:none!important}
   .marquee{overflow-x:auto}
 }

@@ -3,8 +3,9 @@ const cors = require('cors');
 const fileUpload = require('express-fileupload');
 const { MongoClient, ObjectId } = require('mongodb');
 require('dotenv').config();
-const { sampleData } = require('./sampleData');
+const { createDemoDb } = require('./demoDb');
 const { demoAccounts, hashPassword, verifyPassword, createToken, readToken } = require('./auth');
+const v = require('./validation');
 
 // Some networks refuse the SRV lookups that mongodb+srv:// needs, so DNS_SERVERS can name other resolvers.
 if (process.env.DNS_SERVERS) require('node:dns').setServers(process.env.DNS_SERVERS.split(',').map((server) => server.trim()));
@@ -27,30 +28,8 @@ app.use((req, _res, next) => { req.body ??= {}; next(); });
 
 const asyncRoute = (handler) => (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
 const parseId = (value) => ObjectId.isValid(value) ? new ObjectId(value) : null;
+const fail = (res, status, error) => res.status(status).json({ error });
 const demoMode = !mongoUri && process.env.NODE_ENV !== 'production';
-
-function createDemoDb() {
-  const sample = sampleData();
-  const data = {
-    service: sample.service,
-    review: sample.review.map((review) => ({ ...review, _id: new ObjectId(), demo: true })),
-    book: [],
-    user: [],
-    admin: sample.admin.map((admin) => ({ ...admin, _id: new ObjectId() }))
-  };
-  return { collection(name) {
-    const rows = data[name];
-    const matches = (row, filter = {}) => Object.entries(filter).every(([key, value]) => String(row[key]) === String(value));
-    return {
-      find(filter = {}) { return { toArray: async () => rows.filter((row) => matches(row, filter)) }; },
-      async findOne(filter) { return rows.find((row) => matches(row, filter)) || null; },
-      async insertOne(value) { const row = { ...value, _id: new ObjectId() }; rows.push(row); return { insertedId: row._id }; },
-      async updateOne(filter, update) { const row = rows.find((item) => matches(item, filter)); if (!row) return { modifiedCount: 0 }; Object.assign(row, update.$set); return { modifiedCount: 1 }; },
-      async createIndex() {},
-      async deleteOne(filter) { const index = rows.findIndex((row) => matches(row, filter)); if (index < 0) return { deletedCount: 0 }; rows.splice(index, 1); return { deletedCount: 1 }; }
-    };
-  } };
-}
 
 app.get('/', (_req, res) => res.json({ app: 'Dependable Clean API', mode: demoMode ? 'local preview' : 'database' }));
 app.get('/health', (_req, res) => res.json({ ok: true, mode: demoMode ? 'local preview' : 'database' }));
@@ -83,9 +62,10 @@ async function start() {
   const bookings = db.collection('book');
   const admins = db.collection('admin');
   const users = db.collection('user');
+  const locations = db.collection('location');
   await users.createIndex({ email: 1 }, { unique: true });
 
-  const normalizeEmail = (value) => String(value || '').trim().toLowerCase();
+  // ---------- Accounts ----------
   const isAdminEmail = async (email) => Boolean(await admins.findOne({ email }));
   const session = async (user) => ({
     token: createToken(user.email),
@@ -94,14 +74,24 @@ async function start() {
   const requireUser = asyncRoute(async (req, res, next) => {
     const email = readToken(req.headers.authorization);
     const user = email && await users.findOne({ email });
-    if (!user) return res.status(401).json({ error: 'Please sign in again.' });
+    if (!user) return fail(res, 401, 'Please sign in again.');
     req.user = user;
     next();
   });
   const requireAdmin = [requireUser, asyncRoute(async (req, res, next) => {
-    if (!await isAdminEmail(req.user.email)) return res.status(403).json({ error: 'Only admins can do that.' });
+    if (!await isAdminEmail(req.user.email)) return fail(res, 403, 'Only admins can do that.');
     next();
   })];
+  async function createUser({ name, email, password }) {
+    const user = { name, email, password: hashPassword(password), createdAt: new Date() };
+    try {
+      await users.insertOne(user);
+      return user;
+    } catch (error) {
+      if (error.code === 11000) return null;
+      throw error;
+    }
+  }
 
   // DEMO_ACCOUNTS=off removes the demo sign-in for a real launch.
   const demoEnabled = process.env.DEMO_ACCOUNTS !== 'off';
@@ -115,85 +105,208 @@ async function start() {
     }
   }
 
-  const accountExists = { error: 'An account with this email already exists. Please sign in.' };
+  const accountExists = 'An account with this email already exists. Please sign in.';
   app.post('/signup', asyncRoute(async (req, res) => {
-    const name = String(req.body.name || '').trim();
-    const email = normalizeEmail(req.body.email);
+    const name = v.text(req.body.name, 80);
+    const email = v.normalizeEmail(req.body.email);
     const password = String(req.body.password || '');
-    if (!name) return res.status(400).json({ error: 'Please enter your name.' });
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: 'Please enter a valid email address.' });
-    if (password.length < 6) return res.status(400).json({ error: 'Your password needs at least 6 characters.' });
-    if (await users.findOne({ email })) return res.status(409).json(accountExists);
-    const user = { name, email, password: hashPassword(password), createdAt: new Date() };
-    try {
-      await users.insertOne(user);
-    } catch (error) {
-      if (error.code === 11000) return res.status(409).json(accountExists);
-      throw error;
-    }
-    res.status(201).json(await session(user));
+    if (!name) return fail(res, 400, 'Please enter your name.');
+    if (!v.isEmail(email)) return fail(res, 400, 'Please enter a valid email address.');
+    if (password.length < 6) return fail(res, 400, 'Your password needs at least 6 characters.');
+    if (await users.findOne({ email })) return fail(res, 409, accountExists);
+    const user = await createUser({ name, email, password });
+    if (!user) return fail(res, 409, accountExists);
+    res.json(await session(user));
   }));
   app.post('/login', asyncRoute(async (req, res) => {
-    const user = await users.findOne({ email: normalizeEmail(req.body.email) });
-    if (!user || !verifyPassword(String(req.body.password || ''), user.password)) return res.status(401).json({ error: 'The email or password is not correct.' });
+    const user = await users.findOne({ email: v.normalizeEmail(req.body.email) });
+    if (!user || !verifyPassword(String(req.body.password || ''), user.password)) return fail(res, 401, 'The email or password is not correct.');
     res.json(await session(user));
   }));
   app.post('/demoLogin', asyncRoute(async (req, res) => {
-    if (!demoEnabled) return res.status(404).json({ error: 'Demo accounts are turned off.' });
-    if (!Object.hasOwn(demoAccounts, req.body.role)) return res.status(400).json({ error: 'Choose the customer or admin demo.' });
-    const account = demoAccounts[req.body.role];
-    res.json(await session(await users.findOne({ email: account.email })));
+    if (!demoEnabled) return fail(res, 404, 'Demo accounts are turned off.');
+    if (!Object.hasOwn(demoAccounts, req.body.role)) return fail(res, 400, 'Choose the customer or admin demo.');
+    res.json(await session(await users.findOne({ email: demoAccounts[req.body.role].email })));
   }));
   app.get('/me', requireUser, asyncRoute(async (req, res) => res.json((await session(req.user)).user)));
 
-  app.post('/addService', requireAdmin, asyncRoute(async (req, res) => {
-    const file = req.files?.file;
-    const image = file ? { contentType: file.mimetype, size: file.size, img: file.data } : null;
-    const result = await services.insertOne({ serviceName: req.body.serviceName, details: req.body.details, image, price: Number(req.body.price), category: req.body.category, duration: req.body.duration });
-    res.send(Boolean(result.insertedId));
+  // ---------- Locations ----------
+  const listLocations = async () => (await locations.find({}).toArray()).sort((a, b) => a.name.localeCompare(b.name));
+  const readLocation = (body) => ({ name: v.text(body.name, 80), city: v.text(body.city, 80) });
+  const locationTaken = async (name, exceptId) => (await locations.find({}).toArray())
+    .some((row) => row.name.toLowerCase() === name.toLowerCase() && String(row._id) !== String(exceptId));
+
+  app.get('/locations', asyncRoute(async (_req, res) => res.json(await listLocations())));
+  app.post('/addLocation', requireAdmin, asyncRoute(async (req, res) => {
+    const location = readLocation(req.body);
+    if (!location.name) return fail(res, 400, 'Please enter a location name.');
+    if (await locationTaken(location.name)) return fail(res, 409, 'That location is already on the list.');
+    await locations.insertOne(location);
+    res.json(location);
   }));
-  app.get('/services', asyncRoute(async (_req, res) => res.json(await services.find({}).toArray())));
-  app.post('/addReview', requireUser, asyncRoute(async (req, res) => {
-    res.json(await reviews.insertOne({ name: req.user.name, email: req.user.email, rating: Number(req.body.rating) || 5, comments: req.body.comments }));
+  app.patch('/updateLocation/:id', requireAdmin, asyncRoute(async (req, res) => {
+    const id = parseId(req.params.id);
+    const location = readLocation(req.body);
+    if (!id) return fail(res, 400, 'Invalid location id.');
+    if (!location.name) return fail(res, 400, 'Please enter a location name.');
+    if (await locationTaken(location.name, id)) return fail(res, 409, 'That location is already on the list.');
+    const result = await locations.updateOne({ _id: id }, { $set: location });
+    if (!result.matchedCount) return fail(res, 404, 'Location not found.');
+    res.json({ _id: id, ...location });
   }));
-  app.get('/reviews', asyncRoute(async (_req, res) => res.json((await reviews.find({}).toArray()).map(({ email, ...review }) => review))));
+  app.delete('/deleteLocation/:id', requireAdmin, asyncRoute(async (req, res) => {
+    const id = parseId(req.params.id);
+    if (!id) return fail(res, 400, 'Invalid location id.');
+    if (!(await locations.deleteOne({ _id: id })).deletedCount) return fail(res, 404, 'Location not found.');
+    // Take the location off every service that listed it.
+    for (const service of await services.find({}).toArray()) {
+      if (service.locations?.includes(String(id))) await services.updateOne({ _id: service._id }, { $set: { locations: service.locations.filter((item) => item !== String(id)) } });
+    }
+    res.json(true);
+  }));
+
+  // ---------- Services ----------
+  const listServices = async () => (await services.find({}).toArray()).sort(v.byId);
+  const locationIds = async () => new Set((await locations.find({}).toArray()).map((row) => String(row._id)));
+
+  app.get('/services', asyncRoute(async (_req, res) => res.json(await listServices())));
+  app.get('/serviceList', asyncRoute(async (_req, res) => res.json(await listServices())));
   app.get('/book/:id', asyncRoute(async (req, res) => {
     const id = parseId(req.params.id);
-    if (!id) return res.status(400).json({ error: 'Invalid service id.' });
+    if (!id) return fail(res, 400, 'Invalid service id.');
     const service = await services.findOne({ _id: id });
-    if (!service) return res.status(404).json({ error: 'Service not found.' });
+    if (!service) return fail(res, 404, 'Service not found.');
     res.json(service);
   }));
-  app.post('/addAllBook', requireUser, asyncRoute(async (req, res) => {
-    const booking = { ...req.body, name: req.user.name, email: req.user.email, status: 'Pending', createdAt: new Date().toISOString() };
-    res.send(Boolean((await bookings.insertOne(booking)).insertedId));
+  app.post('/addService', requireAdmin, asyncRoute(async (req, res) => {
+    const { service, error } = v.readService(req.body, await locationIds());
+    if (error) return fail(res, 400, error);
+    const file = req.files?.file;
+    if (file) service.image = { contentType: file.mimetype, size: file.size, img: file.data };
+    await services.insertOne(service);
+    res.json(service);
   }));
-  app.get('/orderList', requireAdmin, asyncRoute(async (_req, res) => res.json(await bookings.find({}).toArray())));
-  app.patch('/updateOrderList/:id', requireAdmin, asyncRoute(async (req, res) => {
+  app.patch('/updateService/:id', requireAdmin, asyncRoute(async (req, res) => {
     const id = parseId(req.params.id);
-    if (!id) return res.status(400).json({ error: 'Invalid booking id.' });
-    const result = await bookings.updateOne({ _id: id }, { $set: { status: req.body.status } });
-    res.send(result.modifiedCount > 0);
+    if (!id) return fail(res, 400, 'Invalid service id.');
+    const { service, error } = v.readService(req.body, await locationIds());
+    if (error) return fail(res, 400, error);
+    if (!(await services.updateOne({ _id: id }, { $set: service })).matchedCount) return fail(res, 404, 'Service not found.');
+    res.json(await services.findOne({ _id: id }));
   }));
-  app.get('/serviceList', asyncRoute(async (_req, res) => res.json(await services.find({}).toArray())));
   app.delete('/deleteClasses/:id', requireAdmin, asyncRoute(async (req, res) => {
     const id = parseId(req.params.id);
-    if (!id) return res.status(400).json({ error: 'Invalid service id.' });
-    res.send((await services.deleteOne({ _id: id })).deletedCount > 0);
+    if (!id) return fail(res, 400, 'Invalid service id.');
+    if (!(await services.deleteOne({ _id: id })).deletedCount) return fail(res, 404, 'Service not found.');
+    res.json(true);
   }));
-  app.get('/bookingList', requireUser, asyncRoute(async (req, res) => res.json(await bookings.find({ email: req.user.email }).toArray())));
-  app.post('/addAdmin', requireAdmin, asyncRoute(async (req, res) => {
-    const email = normalizeEmail(req.body.email);
-    if (!email) return res.status(400).json({ error: 'Please enter an email address.' });
-    if (await isAdminEmail(email)) return res.send(true);
-    res.send(Boolean((await admins.insertOne({ email })).insertedId));
-  }));
-  app.get('/admin', requireAdmin, asyncRoute(async (_req, res) => res.json(await admins.find({}).toArray())));
-  app.post('/isAdmin', asyncRoute(async (req, res) => res.json(await isAdminEmail(normalizeEmail(req.body.email)))));
 
+  // ---------- Bookings ----------
+  app.post('/addAllBook', requireUser, asyncRoute(async (req, res) => {
+    const id = parseId(req.body.serviceId);
+    const service = id && await services.findOne({ _id: id });
+    if (!service) return fail(res, 400, 'Please choose a service to book.');
+    const date = v.text(req.body.date, 10);
+    if (!v.isIsoDate(date)) return fail(res, 400, 'Please choose a date for your clean.');
+    if (date < v.earliestBookingDate()) return fail(res, 400, `Please choose a date at least ${v.BOOKING_LEAD_DAYS} days from today.`);
+    const address = v.text(req.body.address, 300);
+    if (!address) return fail(res, 400, 'Please enter the service address.');
+    // When locations exist, the booking must name one the service covers. A service with no locations covers them all.
+    const allLocations = await listLocations();
+    let location = null;
+    if (allLocations.length) {
+      const covered = service.locations?.length ? allLocations.filter((row) => service.locations.includes(String(row._id))) : allLocations;
+      location = covered.find((row) => String(row._id) === String(req.body.locationId));
+      if (!location) return fail(res, 400, 'Please choose a location we serve for this clean.');
+    }
+    const booking = {
+      serviceId: String(service._id), serviceName: service.serviceName, price: Number(service.price), date, address, notes: v.text(req.body.notes, 1000),
+      locationId: location ? String(location._id) : null, locationName: location ? [location.name, location.city].filter(Boolean).join(', ') : null,
+      name: req.user.name, email: req.user.email, status: 'Pending', createdAt: new Date().toISOString()
+    };
+    await bookings.insertOne(booking);
+    res.json(booking);
+  }));
+  app.get('/bookingList', requireUser, asyncRoute(async (req, res) => res.json((await bookings.find({ email: req.user.email }).toArray()).sort(v.newestFirst))));
+  app.get('/orderList', requireAdmin, asyncRoute(async (_req, res) => res.json((await bookings.find({}).toArray()).sort(v.newestFirst))));
+  app.patch('/updateOrderList/:id', requireAdmin, asyncRoute(async (req, res) => {
+    const id = parseId(req.params.id);
+    if (!id) return fail(res, 400, 'Invalid booking id.');
+    if (!v.bookingStatuses.includes(req.body.status)) return fail(res, 400, 'Choose a valid booking status.');
+    if (!(await bookings.updateOne({ _id: id }, { $set: { status: req.body.status } })).matchedCount) return fail(res, 404, 'Booking not found.');
+    res.json(true);
+  }));
+
+  // ---------- Reviews ----------
+  // New reviews wait for an admin. Reviews saved before moderation existed have no status and count as approved.
+  const reviewStatus = (review) => review.status || 'Approved';
+  const withStatus = (review) => ({ ...review, status: reviewStatus(review) });
+
+  app.post('/addReview', requireUser, asyncRoute(async (req, res) => {
+    const comments = v.text(req.body.comments, 1000);
+    const rating = Math.round(Number(req.body.rating));
+    if (comments.length < 10) return fail(res, 400, 'Please write at least 10 characters.');
+    if (!(rating >= 1 && rating <= 5)) return fail(res, 400, 'Please choose a rating from 1 to 5.');
+    const review = { name: req.user.name, email: req.user.email, rating, comments, status: 'Pending', createdAt: new Date().toISOString() };
+    await reviews.insertOne(review);
+    res.json(review);
+  }));
+  app.get('/reviews', asyncRoute(async (_req, res) => {
+    const approved = (await reviews.find({}).toArray()).filter((review) => reviewStatus(review) === 'Approved').sort(v.newestFirst);
+    res.json(approved.map(({ email, ...review }) => withStatus(review)));
+  }));
+  app.get('/myReviews', requireUser, asyncRoute(async (req, res) => res.json((await reviews.find({ email: req.user.email }).toArray()).sort(v.newestFirst).map(withStatus))));
+  app.get('/reviewList', requireAdmin, asyncRoute(async (_req, res) => res.json((await reviews.find({}).toArray()).sort(v.newestFirst).map(withStatus))));
+  app.patch('/updateReview/:id', requireAdmin, asyncRoute(async (req, res) => {
+    const id = parseId(req.params.id);
+    if (!id) return fail(res, 400, 'Invalid review id.');
+    if (!v.reviewStatuses.includes(req.body.status)) return fail(res, 400, 'Choose Pending, Approved or Rejected.');
+    if (!(await reviews.updateOne({ _id: id }, { $set: { status: req.body.status } })).matchedCount) return fail(res, 404, 'Review not found.');
+    res.json(true);
+  }));
+  app.delete('/deleteReview/:id', requireAdmin, asyncRoute(async (req, res) => {
+    const id = parseId(req.params.id);
+    if (!id) return fail(res, 400, 'Invalid review id.');
+    if (!(await reviews.deleteOne({ _id: id })).deletedCount) return fail(res, 404, 'Review not found.');
+    res.json(true);
+  }));
+
+  // ---------- Team ----------
+  // Adding a teammate who has no account creates one with the temporary password, so they can sign in right away.
+  app.post('/addAdmin', requireAdmin, asyncRoute(async (req, res) => {
+    const email = v.normalizeEmail(req.body.email);
+    if (!v.isEmail(email)) return fail(res, 400, 'Please enter a valid email address.');
+    let user = await users.findOne({ email });
+    const created = !user;
+    if (!user) {
+      const name = v.text(req.body.name, 80);
+      const password = String(req.body.password || '');
+      if (!name || password.length < 6) return fail(res, 400, 'This person does not have an account yet. Add their name and a temporary password of at least 6 characters.');
+      user = await createUser({ name, email, password });
+      if (!user) return fail(res, 409, 'This account was just created. Please try again.');
+    }
+    if (!await isAdminEmail(email)) await admins.insertOne({ email });
+    res.json({ email, name: user.name, hasAccount: true, created });
+  }));
+  app.get('/admin', requireAdmin, asyncRoute(async (_req, res) => {
+    const rows = await admins.find({}).toArray();
+    res.json(await Promise.all(rows.map(async (row) => {
+      const user = await users.findOne({ email: row.email });
+      return { _id: row._id, email: row.email, name: user?.name || '', hasAccount: Boolean(user) };
+    })));
+  }));
+  app.delete('/deleteAdmin/:email', requireAdmin, asyncRoute(async (req, res) => {
+    const email = v.normalizeEmail(req.params.email);
+    if (email === req.user.email) return fail(res, 400, 'You cannot remove your own admin access.');
+    if (!(await admins.deleteOne({ email })).deletedCount) return fail(res, 404, 'That person is not an admin.');
+    res.json(true);
+  }));
+  app.post('/isAdmin', asyncRoute(async (req, res) => res.json(await isAdminEmail(v.normalizeEmail(req.body.email)))));
+
+  app.use((_req, res) => fail(res, 404, 'Not found.'));
   app.use((err, _req, res, _next) => {
     console.error(err);
-    res.status(500).json({ error: 'Internal server error.' });
+    fail(res, 500, 'Internal server error.');
   });
   app.listen(port, () => console.log(`Dependable Clean API listening on http://localhost:${port}`));
 }

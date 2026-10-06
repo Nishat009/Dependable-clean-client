@@ -36,7 +36,7 @@
 .hs-ring-two{width:min(64%,340px);aspect-ratio:1;border-style:dashed;border-color:#ffffff10;animation:spin-soft 60s linear infinite reverse}
 .hs-floor{position:absolute;left:50%;bottom:9%;width:min(70%,380px);height:46px;translate:-50% 0;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--accent) 35%,transparent),transparent);transition:background 1s}
 .hs-slide{position:absolute;inset:4% 0 10%;display:flex;align-items:flex-end;justify-content:center;opacity:0;visibility:hidden;pointer-events:none}
-.hs-slide .product{height:min(100%,470px);filter:drop-shadow(0 40px 45px #000a)}
+.hs-slide .product{height:min(100%,470px);width:auto;aspect-ratio:4/5;object-fit:cover;border-radius:24px;box-shadow:0 40px 70px #000b,0 0 0 1px #ffffff1f}
 .hs-slide.is-active{visibility:visible;opacity:1;animation:product-in 1s var(--ease) both}
 .hs-slide.is-active .product{animation:product-float 6s ease-in-out 1s infinite}
 .hs-slide.is-leaving{visibility:visible;animation:product-out .75s var(--ease) both}
@@ -60,8 +60,8 @@
 .hs-arrow:hover:not(:disabled){border-color:#fff}
 .hs .quick-book{margin-top:-96px}
 
-@keyframes product-in{from{opacity:0;transform:translateX(calc(var(--dir,1) * 55%)) rotate(calc(var(--dir,1) * 9deg)) scale(.86);filter:blur(16px)}to{opacity:1;transform:none;filter:blur(0)}}
-@keyframes product-out{from{opacity:1;transform:none;filter:blur(0)}to{opacity:0;transform:translateX(calc(var(--dir,1) * -55%)) rotate(calc(var(--dir,1) * -9deg)) scale(.86);filter:blur(16px)}}
+@keyframes product-in{from{opacity:0;transform:translateX(calc(var(--dir,1) * 40%)) rotate(calc(var(--dir,1) * 6deg)) scale(.9)}to{opacity:1;transform:none}}
+@keyframes product-out{from{opacity:1;transform:none}to{opacity:0;transform:translateX(calc(var(--dir,1) * -40%)) rotate(calc(var(--dir,1) * -6deg)) scale(.9)}}
 @keyframes roll-in{from{translate:0 105%;opacity:0}to{translate:0 0;opacity:1}}
 @keyframes tab-progress{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 @keyframes bubble-rise{0%{opacity:0;transform:translateY(0) scale(.6)}15%{opacity:1}100%{opacity:0;transform:translateY(-380px) scale(1.1)}}

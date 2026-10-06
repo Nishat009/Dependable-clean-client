@@ -1,29 +1,29 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from 'react';
 import Link from 'next/link';
-import { useSelector } from 'react-redux';
-import Icon from './Icons';
-import Product from './Products';
-import { ButtonLink } from './Layout';
-import { formatMoney, heroSlides } from './data';
+import { useAppSelector } from '../../store';
+import { formatMoney, heroSlides } from '../data';
+import ButtonLink from './ButtonLink';
+import Icon from './Icon';
 import { prefersReducedMotion } from './Motion';
+import Product from './Product';
 
 const AUTOPLAY_MS = 6000;
-const pad = (value) => String(value).padStart(2, '0');
+const pad = (value: number) => String(value).padStart(2, '0');
 
 // Home hero: cleaning products slide in and out like a product showcase.
 // Tabs, arrows, swipe and arrow keys all move the slider; it autoplays until the visitor interacts.
-export default function HeroSlider({ children }) {
-  const services = useSelector((state) => state.services.items);
+export default function HeroSlider({ children }: { children?: ReactNode }) {
+  const services = useAppSelector((state) => state.services.items);
   const [index, setIndex] = useState(0);
-  const [previous, setPrevious] = useState(null);
+  const [previous, setPrevious] = useState<number | null>(null);
   const [direction, setDirection] = useState(1);
   const [paused, setPaused] = useState(false);
   const [autoplay, setAutoplay] = useState(false);
-  const touch = useRef(null);
-  const tabs = useRef([]);
+  const touch = useRef<number | null>(null);
+  const tabs = useRef<(HTMLButtonElement | null)[]>([]);
   const count = heroSlides.length;
 
-  function go(next, dir) {
+  function go(next: number, dir?: number) {
     const target = (next + count) % count;
     if (target === index) return;
     setPrevious(index);
@@ -50,10 +50,10 @@ export default function HeroSlider({ children }) {
   const slide = heroSlides[index];
   const service = services.find((item) => item._id === slide.serviceId) || services[index % Math.max(services.length, 1)];
   const href = service ? '/book/' + service._id : '/book';
-  const stats = [slide.stat, [service?.duration?.replace(' hours', 'h').replace(' hour', 'h') || 'Flexible', 'Visit length'], [formatMoney(service?.price), 'Starting from']];
+  const stats: [string, string][] = [slide.stat, [service?.duration?.replace(' hours', 'h').replace(' hour', 'h') || 'Flexible', 'Visit length'], [formatMoney(service?.price), 'Starting from']];
 
-  function onTabKey(event) {
-    const keys = { ArrowRight: 1, ArrowLeft: -1 };
+  function onTabKey(event: KeyboardEvent) {
+    const keys: Record<string, number> = { ArrowRight: 1, ArrowLeft: -1 };
     if (!(event.key in keys)) return;
     event.preventDefault();
     const target = (index + keys[event.key] + count) % count;
@@ -61,9 +61,9 @@ export default function HeroSlider({ children }) {
     tabs.current[target]?.focus();
   }
 
-  return <section className={'hs' + (paused ? ' is-paused' : '')} style={{ '--accent': slide.accent, '--autoplay': AUTOPLAY_MS + 'ms' }}
+  return <section className={'hs' + (paused ? ' is-paused' : '')} style={{ '--accent': slide.accent, '--autoplay': AUTOPLAY_MS + 'ms' } as CSSProperties}
     aria-roledescription="carousel" aria-label="Featured cleaning products"
-    onFocus={() => setPaused(true)} onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setPaused(false); }}>
+    onFocus={() => setPaused(true)} onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setPaused(false); }}>
     <div className="hs-bg" aria-hidden="true"><span className="hs-grid" /><span className="hs-glow" /></div>
 
     <div className="wrap hs-inner">
@@ -86,7 +86,7 @@ export default function HeroSlider({ children }) {
       </div>
 
       <dl className="hs-stats">
-        {stats.map(([value, label], i) => <div key={i} style={{ '--i': i }}><dt>{label}</dt><dd><span className="hs-roll"><span key={index}>{value}</span></span></dd></div>)}
+        {stats.map(([value, label], i) => <div key={i} style={{ '--i': i } as CSSProperties}><dt>{label}</dt><dd><span className="hs-roll"><span key={index}>{value}</span></span></dd></div>)}
       </dl>
 
       <div className="hs-actions">
@@ -94,7 +94,7 @@ export default function HeroSlider({ children }) {
         <Link className="text-link" href="/#process">How it works <Icon name="arrow" size={19} /></Link>
       </div>
 
-      <div className="hs-stage" id="hs-panel" role="tabpanel" aria-labelledby={'hs-tab-' + index} style={{ '--dir': direction }}
+      <div className="hs-stage" id="hs-panel" role="tabpanel" aria-labelledby={'hs-tab-' + index} style={{ '--dir': direction } as CSSProperties}
         onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}
         onTouchStart={(event) => { touch.current = event.touches[0].clientX; }}
         onTouchEnd={(event) => {
@@ -105,8 +105,9 @@ export default function HeroSlider({ children }) {
         }}>
         <span className="hs-ring hs-ring-one" aria-hidden="true" /><span className="hs-ring hs-ring-two" aria-hidden="true" />
         <span className="hs-floor" aria-hidden="true" />
+        {/* Every slide loads up front, so a photo never pops in halfway through its entrance. */}
         {heroSlides.map((item, i) => <div key={item.product} className={'hs-slide' + (i === index ? ' is-active' : i === previous ? ' is-leaving' : '')} aria-hidden={i !== index}>
-          <Product type={item.product} title={i === index ? item.name : undefined} />
+          <Product type={item.product} described={i === index} eager />
         </div>)}
         <span className="hs-bubbles" aria-hidden="true"><i /><i /><i /><i /><i /></span>
         <div className="hs-caption" key={'c' + index}>
