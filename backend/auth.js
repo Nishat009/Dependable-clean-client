@@ -6,9 +6,10 @@ if (!process.env.AUTH_SECRET && process.env.NODE_ENV === 'production') {
   console.warn('AUTH_SECRET is not set, so everyone is signed out whenever the API restarts.');
 }
 
-// The demo buttons on the sign-in page use these accounts. The API creates them when it starts.
+// The demo buttons on the sign-in page use these accounts. The API creates them when it starts, with their team role.
 const demoAccounts = {
-  admin: { name: 'Alex Morgan', email: 'admin@dependableclean.demo', password: 'demo-admin-123' },
+  admin: { name: 'Alex Morgan', email: 'admin@dependableclean.demo', password: 'demo-admin-123', role: 'superAdmin' },
+  staff: { name: 'Sam Chowdhury', email: 'staff@dependableclean.demo', password: 'demo-staff-123', role: 'staff' },
   customer: { name: 'Jamie Rivera', email: 'customer@dependableclean.demo', password: 'demo-customer-123' }
 };
 

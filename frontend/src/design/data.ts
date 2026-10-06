@@ -1,4 +1,4 @@
-import type { ProductType, Service } from './types';
+import type { Location, ProductType, Service } from './types';
 
 // Shown until the API answers. The ids and details match backend/sampleData.js.
 export const demoServices: Service[] = [
@@ -102,4 +102,11 @@ export function formatDate(value?: string | null): string {
   return Number.isNaN(date.getTime())
     ? value
     : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+export const thanaOptions = (thanas: string[]) => thanas.map((thana) => ({ value: thana, label: thana }));
+
+/** Where a location is, such as "Gulshan, Dhaka · Road 11". */
+export function describeLocation(location: Location): string {
+  return [location.thana ? location.thana + ', Dhaka' : location.city, location.address].filter(Boolean).join(' · ') || 'Dhaka';
 }

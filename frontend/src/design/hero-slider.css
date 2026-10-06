@@ -1,9 +1,8 @@
-/* Home hero product slider (HeroSlider.js). Arrow buttons reuse .carousel-arrow from carousel.css. */
+/* Home hero product slider. Styles stay scoped to the hero. */
 .flip-x{transform:scaleX(-1)}
 .hs{--accent:#d7fb60;position:relative;isolation:isolate;background:#0c110d;color:#fff;padding-top:94px;overflow-x:clip}
 .hs-bg{position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none;background:radial-gradient(70% 60% at 15% -10%,#24331f 0%,transparent 60%),linear-gradient(180deg,#0c110d 0%,#111713 100%)}
-.hs-grid{position:absolute;inset:0;background-image:linear-gradient(#ffffff08 1px,transparent 1px),linear-gradient(90deg,#ffffff08 1px,transparent 1px);background-size:64px 64px;-webkit-mask-image:radial-gradient(60% 70% at 70% 45%,#000,transparent 75%);mask-image:radial-gradient(60% 70% at 70% 45%,#000,transparent 75%)}
-.hs-glow{position:absolute;width:min(62vw,820px);aspect-ratio:1;right:-6%;top:50%;translate:0 -50%;border-radius:50%;background:var(--accent);opacity:.17;filter:blur(110px);transition:background-color 1.2s ease}
+.hs-glow{position:absolute;width:min(58vw,760px);height:370px;right:6%;top:48%;translate:0 -50%;border-radius:50%;background:var(--accent);opacity:.09;filter:blur(100px);transition:background-color .85s ease}
 .hs-inner{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);grid-template-areas:"head stage" "tabs stage" "stats stage" "actions stage";grid-template-rows:auto auto auto 1fr;column-gap:48px;padding:56px 0 150px;min-height:760px;align-content:center}
 .hs-head{grid-area:head}
 .hs-head h1{font-size:clamp(50px,5.4vw,90px);line-height:1;font-weight:800;margin:22px 0 22px}
@@ -29,30 +28,19 @@
 .hs-actions{grid-area:actions;display:flex;align-items:center;gap:28px;flex-wrap:wrap;align-self:start;animation:reveal-up .9s var(--ease) .96s both}
 
 /* ---------- Product stage ---------- */
-.hs-stage{grid-area:stage;position:relative;min-height:540px;touch-action:pan-y;animation:fade-in 1.2s ease .2s both}
-.hs-ring{position:absolute;left:50%;top:47%;translate:-50% -50%;border-radius:50%;border:1px solid #ffffff14;pointer-events:none}
-.hs-ring-one{width:min(88%,470px);aspect-ratio:1;animation:spin-soft 40s linear infinite}
-.hs-ring-one::after{content:'';position:absolute;top:50%;left:-5px;width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 18px var(--accent);transition:background-color 1s}
-.hs-ring-two{width:min(64%,340px);aspect-ratio:1;border-style:dashed;border-color:#ffffff10;animation:spin-soft 60s linear infinite reverse}
-.hs-floor{position:absolute;left:50%;bottom:9%;width:min(70%,380px);height:46px;translate:-50% 0;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--accent) 35%,transparent),transparent);transition:background 1s}
-.hs-slide{position:absolute;inset:4% 0 10%;display:flex;align-items:flex-end;justify-content:center;opacity:0;visibility:hidden;pointer-events:none}
-.hs-slide .product{height:min(100%,470px);width:auto;aspect-ratio:4/5;object-fit:cover;border-radius:24px;box-shadow:0 40px 70px #000b,0 0 0 1px #ffffff1f}
-.hs-slide.is-active{visibility:visible;opacity:1;animation:product-in 1s var(--ease) both}
-.hs-slide.is-active .product{animation:product-float 6s ease-in-out 1s infinite}
-.hs-slide.is-leaving{visibility:visible;animation:product-out .75s var(--ease) both}
-.hs-bubbles{position:absolute;inset:0;pointer-events:none}
-.hs-bubbles i{position:absolute;bottom:18%;width:14px;height:14px;border-radius:50%;border:1px solid #ffffff55;background:radial-gradient(circle at 30% 30%,#ffffff70,#ffffff08 60%);animation:bubble-rise 7s ease-in infinite}
-.hs-bubbles i:nth-child(1){left:24%;animation-delay:0s}
-.hs-bubbles i:nth-child(2){left:70%;width:9px;height:9px;animation-delay:-2.2s}
-.hs-bubbles i:nth-child(3){left:38%;width:22px;height:22px;animation-delay:-4s}
-.hs-bubbles i:nth-child(4){left:80%;width:16px;height:16px;animation-delay:-5.4s}
-.hs-bubbles i:nth-child(5){left:56%;width:7px;height:7px;animation-delay:-1.1s}
-.hs-caption{position:absolute;top:5%;right:0;display:flex;align-items:center;gap:11px;padding:10px 16px 10px 12px;border:1px solid #ffffff17;border-radius:12px;background:#151d17b8;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);animation:reveal-up .7s var(--ease) .15s both}
+.hs-stage{grid-area:stage;position:relative;min-width:0;min-height:540px;touch-action:pan-y;isolation:isolate;animation:fade-in 1.2s ease .2s both}
+.hs-floor{position:absolute;left:50%;bottom:12%;width:90%;height:28px;translate:-50% 0;border-radius:50%;background:radial-gradient(closest-side,#000b,transparent);filter:blur(5px)}
+.hs-slide{position:absolute;inset:8% -9% 8% -14%;display:flex;align-items:flex-end;justify-content:center;opacity:0;visibility:hidden;pointer-events:none;z-index:1}
+.hs-product{display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 20px 14px #0005);will-change:transform;user-select:none;-webkit-user-drag:none}
+.hs-slide.is-active{visibility:visible;opacity:1;animation:hs-product-enter .85s cubic-bezier(.22,1,.36,1) both}
+.hs-slide.is-active .hs-product{transform-origin:50% 75%;animation:hs-product-drift 4.8s ease-in-out .85s infinite}
+.hs-slide.is-leaving{visibility:visible;animation:hs-product-exit .85s cubic-bezier(.22,1,.36,1) both}
+.hs-caption{position:absolute;z-index:2;top:0;right:0;display:flex;align-items:center;gap:11px;padding:10px 16px 10px 12px;border:1px solid #ffffff17;border-radius:12px;background:#151d17b8;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);animation:reveal-up .7s var(--ease) .15s both}
 .hs-caption small,.hs-caption strong{display:block}
 .hs-caption small{font-size:10px;color:#93a18f;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
 .hs-caption strong{font-size:13px;margin-top:3px;text-transform:capitalize}
 .hs-caption-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 25%,transparent);flex:none}
-.hs-nav{position:absolute;right:0;bottom:0;display:flex;align-items:center;gap:10px}
+.hs-nav{position:absolute;z-index:2;right:0;bottom:0;display:flex;align-items:center;gap:10px}
 .hs-count{font-size:12px;color:#93a18f;margin-right:8px;font-variant-numeric:tabular-nums}
 .hs-count strong{color:#fff;font-size:15px}
 .hs-arrow{border-color:#ffffff30;color:#fff}
@@ -60,11 +48,11 @@
 .hs-arrow:hover:not(:disabled){border-color:#fff}
 .hs .quick-book{margin-top:-96px}
 
-@keyframes product-in{from{opacity:0;transform:translateX(calc(var(--dir,1) * 40%)) rotate(calc(var(--dir,1) * 6deg)) scale(.9)}to{opacity:1;transform:none}}
-@keyframes product-out{from{opacity:1;transform:none}to{opacity:0;transform:translateX(calc(var(--dir,1) * -40%)) rotate(calc(var(--dir,1) * -6deg)) scale(.9)}}
+@keyframes hs-product-enter{from{opacity:0;transform:translate3d(calc(var(--dir,1) * 95%),0,0)}20%{opacity:1}to{opacity:1;transform:translate3d(0,0,0)}}
+@keyframes hs-product-exit{from{opacity:1;transform:translate3d(0,0,0)}to{opacity:0;transform:translate3d(calc(var(--dir,1) * -95%),0,0)}}
+@keyframes hs-product-drift{0%,100%{transform:translate3d(0,0,0) rotate(0deg)}25%{transform:translate3d(7px,-10px,0) rotate(.8deg)}50%{transform:translate3d(0,-18px,0) rotate(0deg)}75%{transform:translate3d(-7px,-10px,0) rotate(-.8deg)}}
 @keyframes roll-in{from{translate:0 105%;opacity:0}to{translate:0 0;opacity:1}}
 @keyframes tab-progress{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-@keyframes bubble-rise{0%{opacity:0;transform:translateY(0) scale(.6)}15%{opacity:1}100%{opacity:0;transform:translateY(-380px) scale(1.1)}}
 
 @media(max-width:1100px){
   .hs-inner{column-gap:28px;min-height:700px}
@@ -72,6 +60,7 @@
 }
 @media(max-width:900px){
   .hs-inner{grid-template-columns:minmax(0,1fr);grid-template-areas:"head" "stage" "tabs" "stats" "actions";grid-template-rows:none;min-height:0;padding:36px 0 130px}
+  .hs-inner>*{min-width:0}
   .hs-head p{margin-bottom:6px}
   .hs-stage{min-height:420px;margin:6px 0 22px}
   .hs-glow{width:110vw;right:-30%;top:45%}
@@ -82,7 +71,7 @@
   .hs-head h1{font-size:clamp(44px,12.5vw,66px);margin:18px 0 16px}
   .hs-head p{font-size:15px}
   .hs-stage{min-height:340px;margin-bottom:18px}
-  .hs-slide{inset:8% 0 13%}
+  .hs-slide{inset:13% -3% 9%}
   .hs-caption{top:0;right:auto;left:0;padding:8px 12px 8px 10px}
   .hs-caption strong{font-size:12px}
   .hs-nav{bottom:-4px}
@@ -101,5 +90,5 @@
 }
 @media(prefers-reduced-motion:reduce){
   .hs-slide.is-leaving{visibility:hidden}
-  .hs-bubbles{display:none}
+  .hs-slide.is-active,.hs-slide.is-active .hs-product{animation:none;will-change:auto}
 }
