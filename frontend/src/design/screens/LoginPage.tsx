@@ -4,7 +4,14 @@ import { errorMessage } from '../api';
 import { useAuth } from '../Auth';
 import Icon from '../components/Icon';
 import Notice from '../components/Notice';
+import PasswordInput from '../components/PasswordInput';
 import type { Role } from '../types';
+
+const demos: { role: Role; label: string }[] = [
+  { role: 'customer', label: 'customer' },
+  { role: 'staff', label: 'staff' },
+  { role: 'admin', label: 'super admin' },
+];
 
 type Mode = 'signin' | 'signup';
 type Busy = '' | 'form' | Role;
@@ -53,7 +60,7 @@ export default function LoginPage() {
       <form onSubmit={submit} className="stack-form auth-form">
         {signingUp && <label>Your name<input required autoComplete="name" placeholder="Jamie Rivera" value={name} onChange={(event) => setName(event.target.value)} /></label>}
         <label>Email address<input required type="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={(event) => setEmail(event.target.value)} /></label>
-        <label>Password<input required type="password" minLength={6} autoComplete={signingUp ? 'new-password' : 'current-password'} placeholder={signingUp ? 'At least 6 characters' : 'Your password'} value={password} onChange={(event) => setPassword(event.target.value)} /></label>
+        <label>Password<PasswordInput required minLength={6} autoComplete={signingUp ? 'new-password' : 'current-password'} placeholder={signingUp ? 'At least 6 characters' : 'Your password'} value={password} onChange={(event) => setPassword(event.target.value)} /></label>
         <button className="button auth-primary" type="submit" disabled={Boolean(busy)}>
           <span>{busy === 'form' ? (signingUp ? 'Creating your account…' : 'Signing you in…') : (signingUp ? 'Create account' : 'Sign in')}</span><Icon name="arrowUp" size={19} />
         </button>
@@ -61,8 +68,9 @@ export default function LoginPage() {
       <p className="auth-switch">{signingUp ? 'Already have an account? ' : 'New to Dependable Clean? '}<button type="button" onClick={() => switchMode(signingUp ? 'signin' : 'signup')}>{signingUp ? 'Sign in' : 'Create an account'}</button></p>
       <div className="demo-login">
         <span>TRY A DEMO ACCOUNT</span>
-        <button type="button" disabled={Boolean(busy)} onClick={() => run(() => signInDemo('customer'), 'customer')}>{busy === 'customer' ? 'Opening the customer demo…' : 'Demo customer'} <Icon name="arrow" size={17} /></button>
-        <button type="button" disabled={Boolean(busy)} onClick={() => run(() => signInDemo('admin'), 'admin')}>{busy === 'admin' ? 'Opening the admin demo…' : 'Demo admin'} <Icon name="arrow" size={17} /></button>
+        {demos.map((demo) => <button key={demo.role} type="button" disabled={Boolean(busy)} onClick={() => run(() => signInDemo(demo.role), demo.role)}>
+          {busy === demo.role ? `Opening the ${demo.label} demo…` : 'Demo ' + demo.label} <Icon name="arrow" size={17} />
+        </button>)}
       </div>
       <small>By continuing, you can manage your bookings from one beautiful place.</small>
     </div></div>

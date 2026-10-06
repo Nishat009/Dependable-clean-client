@@ -5,9 +5,17 @@ import { formatMoney, heroSlides } from '../data';
 import ButtonLink from './ButtonLink';
 import Icon from './Icon';
 import { prefersReducedMotion } from './Motion';
-import Product from './Product';
+import sprayImage from '../../../public/visuals/hero-products/spray.webp';
+import dishImage from '../../../public/visuals/hero-products/dish.webp';
+import bathImage from '../../../public/visuals/hero-products/bath.webp';
+import detergentImage from '../../../public/visuals/hero-products/detergent.webp';
+import bucketImage from '../../../public/visuals/hero-products/bucket.webp';
+import pumpImage from '../../../public/visuals/hero-products/pump.webp';
+
+const heroImages = { spray: sprayImage, dish: dishImage, bath: bathImage, detergent: detergentImage, bucket: bucketImage, pump: pumpImage };
 
 const AUTOPLAY_MS = 6000;
+const TRANSITION_MS = 850;
 const pad = (value: number) => String(value).padStart(2, '0');
 
 // Home hero: cleaning products slide in and out like a product showcase.
@@ -22,10 +30,12 @@ export default function HeroSlider({ children }: { children?: ReactNode }) {
   const touch = useRef<number | null>(null);
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
   const count = heroSlides.length;
+  const transitioning = useRef(false);
 
   function go(next: number, dir?: number) {
     const target = (next + count) % count;
-    if (target === index) return;
+    if (target === index || transitioning.current) return;
+    transitioning.current = true;
     setPrevious(index);
     setDirection(dir ?? (target > index ? 1 : -1));
     setIndex(target);
@@ -33,8 +43,14 @@ export default function HeroSlider({ children }: { children?: ReactNode }) {
 
   useEffect(() => { setAutoplay(!prefersReducedMotion()); }, []);
   useEffect(() => {
+    if (previous === null) return;
+    const timer = setTimeout(() => { setPrevious(null); transitioning.current = false; }, TRANSITION_MS);
+    return () => clearTimeout(timer);
+  }, [previous, index]);
+  useEffect(() => {
     if (!autoplay || paused) return undefined;
     const timer = setTimeout(() => {
+      transitioning.current = true;
       setPrevious(index);
       setDirection(1);
       setIndex((index + 1) % count);
@@ -64,7 +80,7 @@ export default function HeroSlider({ children }: { children?: ReactNode }) {
   return <section className={'hs' + (paused ? ' is-paused' : '')} style={{ '--accent': slide.accent, '--autoplay': AUTOPLAY_MS + 'ms' } as CSSProperties}
     aria-roledescription="carousel" aria-label="Featured cleaning products"
     onFocus={() => setPaused(true)} onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setPaused(false); }}>
-    <div className="hs-bg" aria-hidden="true"><span className="hs-grid" /><span className="hs-glow" /></div>
+    <div className="hs-bg" aria-hidden="true"><span className="hs-glow" /></div>
 
     <div className="wrap hs-inner">
       <div className="hs-head">
@@ -103,13 +119,11 @@ export default function HeroSlider({ children }: { children?: ReactNode }) {
           touch.current = null;
           if (Math.abs(delta) > 45) go(index + (delta < 0 ? 1 : -1), delta < 0 ? 1 : -1);
         }}>
-        <span className="hs-ring hs-ring-one" aria-hidden="true" /><span className="hs-ring hs-ring-two" aria-hidden="true" />
         <span className="hs-floor" aria-hidden="true" />
         {/* Every slide loads up front, so a photo never pops in halfway through its entrance. */}
         {heroSlides.map((item, i) => <div key={item.product} className={'hs-slide' + (i === index ? ' is-active' : i === previous ? ' is-leaving' : '')} aria-hidden={i !== index}>
-          <Product type={item.product} described={i === index} eager />
+          <img className="hs-product" src={heroImages[item.product].src} alt={i === index ? item.name + ' cleaning kit' : ''} width={heroImages[item.product].width} height={heroImages[item.product].height} loading="eager" decoding="async" />
         </div>)}
-        <span className="hs-bubbles" aria-hidden="true"><i /><i /><i /><i /><i /></span>
         <div className="hs-caption" key={'c' + index}>
           <span className="hs-caption-dot" />
           <span><small>Now in the kit</small><strong>{slide.name}</strong></span>

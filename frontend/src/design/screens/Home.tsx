@@ -121,12 +121,16 @@ export default function Home() {
     </section>
 
     <section className="section reviews-section" id="reviews">
-      <div className="wrap reviews-grid">
-        <div data-reveal><SectionIntro label="GOOD WORDS" title={<>The feeling<br /><em>says it all.</em></>} description="Little moments after a big refresh." dark /><div className="review-stars"><span>{[0, 1, 2, 3, 4].map((star) => <i key={star}>★</i>)}</span><small>Care worth coming home to</small></div></div>
-        <div className="review-stack" data-reveal="stagger-right">
-          {reviews.length ? reviews.slice(0, 3).map((review) => <ReviewCard key={review._id} review={review} />)
-            : <article className="review-card"><Icon name="sparkle" size={30} /><h3>Your fresh start is next.</h3><p>Book a clean and tell us what a refreshed space feels like to you.</p><ButtonLink href="/book">Explore services</ButtonLink></article>}
+      <div className="wrap">
+        <div className="section-header-row" data-reveal>
+          <SectionIntro label="GOOD WORDS" title={<>The feeling<br /><em>says it all.</em></>} description="Little moments after a big refresh, in our customers' own words." dark />
+          <div className="review-stars"><span>{[0, 1, 2, 3, 4].map((star) => <i key={star}>★</i>)}</span><small>{reviews.length ? reviews.length + (reviews.length === 1 ? ' review' : ' reviews') + ' from real orders' : 'Care worth coming home to'}</small></div>
         </div>
+        {reviews.length
+          ? <Carousel label="Customer reviews" className="review-carousel" autoPlay={5500}>
+            {reviews.map((review) => <ReviewCard key={review._id} review={review} />)}
+          </Carousel>
+          : <article className="review-card review-card-empty" data-reveal><Icon name="sparkle" size={30} /><h3>Your fresh start is next.</h3><p>Book a clean and tell us what a refreshed space feels like to you.</p><ButtonLink href="/book">Explore services</ButtonLink></article>}
       </div>
     </section>
   </main>;

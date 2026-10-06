@@ -75,11 +75,15 @@ interface CarouselProps {
   label: string;
   className?: string;
   reveal?: string;
+  /** Moves to the next slide every this many milliseconds, back to the start after the last. Pauses on hover and focus. */
+  autoPlay?: number;
 }
 
 // Scroll-snap slider with arrow buttons and a progress bar. Native swipe on touch screens.
-export function Carousel({ children, label, className = '', reveal = 'stagger' }: CarouselProps) {
+export function Carousel({ children, label, className = '', reveal = 'stagger', autoPlay }: CarouselProps) {
   const track = useRef<HTMLDivElement>(null);
+  const root = useRef<HTMLDivElement>(null);
+  const paused = useRef(false);
   const [state, setState] = useState({ start: true, end: false, progress: 0 });
   const items = React.Children.toArray(children) as ReactElement[];
 
@@ -97,6 +101,17 @@ export function Carousel({ children, label, className = '', reveal = 'stagger' }
     return () => { element.removeEventListener('scroll', update); window.removeEventListener('resize', update); };
   }, [items.length]);
 
+  useEffect(() => {
+    if (!autoPlay || prefersReducedMotion()) return undefined;
+    const timer = window.setInterval(() => {
+      const element = track.current;
+      if (!element || paused.current || document.hidden || element.scrollWidth <= element.clientWidth) return;
+      if (element.scrollLeft >= element.scrollWidth - element.clientWidth - 2) element.scrollTo({ left: 0, behavior: 'smooth' });
+      else move(1);
+    }, autoPlay);
+    return () => window.clearInterval(timer);
+  }, [autoPlay, items.length]);
+
   const move = (direction: 1 | -1) => {
     const element = track.current;
     const slide = element?.firstElementChild;
@@ -105,7 +120,9 @@ export function Carousel({ children, label, className = '', reveal = 'stagger' }
     element.scrollBy({ left: direction * (slide.getBoundingClientRect().width + gap), behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
   };
 
-  return <div className={'carousel ' + className}>
+  const pause = (value: boolean) => () => { paused.current = value; };
+  return <div className={'carousel ' + className} ref={root} onMouseEnter={pause(true)} onMouseLeave={pause(false)} onFocus={pause(true)}
+    onBlur={(event) => { if (!root.current?.contains(event.relatedTarget as Node)) paused.current = false; }}>
     <div className="carousel-track" ref={track} role="region" aria-label={label} tabIndex={0} data-reveal={reveal}
       onKeyDown={(event) => { if (event.key === 'ArrowRight') { event.preventDefault(); move(1); } if (event.key === 'ArrowLeft') { event.preventDefault(); move(-1); } }}>
       {items.map((child, index) => <div className="carousel-slide" key={child.key ?? index}>{child}</div>)}

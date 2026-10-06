@@ -1,0 +1,135 @@
+/* Shared controls: the themed dropdown, confirm modal and password field, plus the review and team overview screens. */
+
+/* ---------- Dropdown (components/Select.tsx) ---------- */
+.select-field{display:grid;gap:9px;min-width:0;position:relative}
+.select-anchor{position:relative}
+/* Form rows and list rows animate in, which gives each its own layer; lift the one holding an open menu above the rest. */
+.select-field.is-open{z-index:50}
+:is(.stack-form,.admin-list,.form-two,.location-picker)>:has(>.select-field.is-open),:is(.stack-form,.admin-list)>:has(.select-field.is-open){position:relative;z-index:50}
+.select-trigger{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #dce3d8;background:#f7f9f4;border-radius:5px;padding:14px 15px;color:var(--ink);font-size:14px;font-weight:600;text-align:left;cursor:pointer;transition:border-color .2s,box-shadow .2s,background .2s}
+.select-trigger:hover{border-color:#b9c9ad;background:#fbfcf8}
+.select-trigger:focus-visible,.select-field.is-open .select-trigger{outline:none;border-color:#7da32c;box-shadow:0 0 0 3px #d7fb604d;background:#fff}
+.select-value{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.select-placeholder{color:#8a9686;font-weight:500}
+.select-chevron{flex:none;color:#5d8122;transform:rotate(90deg);transition:transform .25s var(--ease)}
+.select-field.is-open .select-chevron{transform:rotate(-90deg)}
+.select-field .select-required{position:absolute;left:50%;bottom:0;width:1px;height:1px;opacity:0;pointer-events:none;border:0;padding:0}
+.select-menu{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:40;background:#19231b;color:#fff;border:1px solid #ffffff14;border-radius:8px;box-shadow:0 22px 50px #0f1a1040;overflow:hidden;animation:select-in .18s var(--ease) both;min-width:200px}
+.select-menu.is-upward{top:auto;bottom:calc(100% + 6px);transform-origin:bottom}
+.select-menu ul{list-style:none;margin:0;padding:6px;max-height:280px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#ffffff30 transparent}
+.select-menu li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;border-radius:5px;font-size:13px;font-weight:600;cursor:pointer;color:#e4ebe0}
+.select-menu li[data-active="true"]{background:#d7fb601f;color:var(--lime)}
+.select-menu li.is-selected{color:var(--lime);font-weight:800}
+.select-menu li.is-selected svg{color:var(--lime);flex:none}
+.select-menu li.is-disabled{opacity:.42;cursor:not-allowed}
+.select-option-text{display:grid;gap:3px;min-width:0}
+.select-option-text>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.select-option-text small{font-size:11px;font-weight:600;color:#9fae99}
+.select-menu li[data-active="true"] small,.select-menu li.is-selected small{color:#c8de8a}
+.select-menu .select-empty{cursor:default;color:#9fae99;font-weight:600}
+.select-search{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid #ffffff14;color:#9fae99}
+.select-menu .select-search input{flex:1;min-width:0;border:0;background:transparent;color:#fff;font-size:13px;font-weight:600;outline:none;padding:2px 0}
+.select-menu .select-search input::placeholder{color:#7f8d7a}
+.select-menu .select-search input:focus{box-shadow:none;border:0}
+.select-compact{width:160px;flex:none}
+.select-compact .select-trigger{padding:10px 12px;font-size:12px;font-weight:700;background:#fff}
+.select-compact .select-menu{left:auto;min-width:180px}
+@keyframes select-in{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:none}}
+
+/* ---------- Confirm modal (components/ConfirmModal.tsx) ---------- */
+.modal-backdrop{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:20px;background:#0c120dcc;backdrop-filter:blur(6px);animation:modal-fade .2s ease both}
+.confirm-modal{width:min(100%,440px);background:#fff;border-radius:14px;padding:34px 32px 28px;text-align:center;box-shadow:0 40px 90px #0008;animation:modal-pop .3s var(--ease) both}
+.modal-icon{width:62px;height:62px;margin:0 auto 18px;border-radius:50%;display:grid;place-items:center;background:#fbe7e3;color:#b4493e;box-shadow:0 0 0 8px #fbe7e370}
+.confirm-modal h2{font-size:25px;line-height:1.2;margin:0 0 10px}
+.confirm-modal p{margin:0;color:var(--muted);font-size:14px;line-height:1.6}
+.confirm-modal p strong{color:var(--ink)}
+.confirm-modal .modal-error{margin-top:14px;background:#fbe7e3;color:#9b3d34;border-radius:5px;padding:10px 12px;font-size:12px;font-weight:700}
+.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:26px}
+.modal-actions .button{justify-content:center;min-height:48px;padding:13px 16px}
+.button-secondary{background:#fff;border-color:#cfdac6;color:var(--ink)}
+.button-secondary:hover{background:#f1f6e8;box-shadow:none}
+.button-danger{background:#c2493d;border-color:#c2493d;color:#fff}
+.button-danger:hover{background:#a83d32;border-color:#a83d32;box-shadow:0 12px 30px #c2493d40}
+.button-danger:disabled,.button-secondary:disabled{opacity:.6;cursor:wait;transform:none}
+@keyframes modal-fade{from{opacity:0}to{opacity:1}}
+@keyframes modal-pop{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+
+/* ---------- Password field (components/PasswordInput.tsx) ---------- */
+.password-field{position:relative;display:block}
+.stack-form .password-field input{padding-right:50px}
+.password-toggle{position:absolute;top:50%;right:6px;transform:translateY(-50%);width:38px;height:38px;border:0;border-radius:5px;background:transparent;color:#6d7b68;display:grid;place-items:center;cursor:pointer;transition:background .2s,color .2s}
+.password-toggle:hover{background:#eaf3d8;color:#3f5f14}
+.password-toggle:focus-visible{outline:2px solid #7da32c;outline-offset:1px}
+.password-toggle[aria-pressed="true"]{color:#5d8122}
+
+/* ---------- Service form: adding a location inline ---------- */
+.location-options .check-row span{display:grid;gap:2px}
+.location-options .check-row small{font-size:11px}
+.location-picker-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.location-picker-foot .small-button{display:inline-flex;align-items:center;gap:6px}
+.location-picker-foot .inline-link{font-size:12px}
+.new-location{display:grid;gap:14px;border:1px dashed #b9cba6;background:#fff;border-radius:6px;padding:16px}
+.new-location-actions{display:flex;justify-content:flex-end;gap:8px}
+.field-error{font-size:12px;font-weight:700;color:#9b3d34}
+.location-edit .select-compact{width:180px}
+
+/* ---------- Writing a review ---------- */
+.review-form-card{margin-bottom:10px}
+.star-picker-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.star-picker{display:flex;gap:4px;background:#f7f9f4;border:1px solid #dce3d8;border-radius:100px;padding:6px 12px}
+.star-picker button{border:0;background:transparent;color:#cbd4c3;font-size:30px;line-height:1;padding:2px 3px;cursor:pointer;transition:transform .2s var(--ease),color .15s}
+.star-picker button:hover{transform:scale(1.18)}
+.star-picker button.selected{color:#98ba36}
+.star-picker button:focus-visible{outline:2px solid #7da32c;outline-offset:2px;border-radius:4px}
+.star-picker-word{font-size:13px;font-weight:800;color:#4e6a1b;background:#eaf3d8;border-radius:100px;padding:7px 13px;min-width:110px;text-align:center}
+.field-count{text-align:right}
+.review-all-done{display:flex;align-items:center;gap:10px;margin:0;background:#eaf3d8;color:#3d5f15;border-radius:6px;padding:16px;font-size:14px;font-weight:700}
+.my-reviews{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.my-review{background:#fff;border:1px solid #dce4d6;border-radius:8px;padding:20px;display:grid;gap:10px;align-content:start}
+.my-review-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.my-review-top strong,.my-review-top small{display:block}
+.my-review-top strong{font-size:15px}
+.my-review-top small{font-size:11px;color:var(--muted);margin-top:4px}
+.my-review p{margin:0;font-size:14px;line-height:1.6;color:#2c372b;overflow-wrap:anywhere}
+.my-review-note{font-size:11px;font-weight:700;color:#7c8b76;border-top:1px solid #eef2ea;padding-top:10px}
+
+/* ---------- Review moderation ---------- */
+.review-row .row-main b{color:var(--ink);font-weight:800}
+.review-row .review-order{display:inline-flex !important;align-items:center;gap:5px;background:#f1f6e8;color:#4e6a1b !important;border-radius:100px;padding:4px 10px;font-weight:700;margin-top:8px !important}
+
+/* ---------- Home: review slider ---------- */
+.reviews-section .section-header-row .review-stars{margin-top:0;align-items:flex-end;text-align:right}
+.review-carousel .carousel-slide:nth-child(3n+2) .review-card{background:#f4f0e6}
+.review-carousel .carousel-slide:nth-child(3n) .review-card{background:#e9f0ec}
+.review-carousel .review-card{display:flex;flex-direction:column;min-height:300px;padding:28px}
+.review-carousel .review-card blockquote{font-size:19px;flex:1;margin:18px 0 24px;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:7;-webkit-box-orient:vertical;overflow:hidden}
+.review-card-empty{max-width:560px}
+.review-card-empty h3{margin:16px 0 8px}
+.review-card-empty p{color:var(--muted);margin:0 0 22px}
+
+/* ---------- Team overview ---------- */
+.team-stats{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+.team-stat{background:#fff;border:1px solid #dce5d6;border-radius:6px;padding:25px;display:grid;gap:7px;color:var(--ink);transition:transform .25s var(--ease),border-color .25s,box-shadow .25s}
+.team-stat:hover{transform:translateY(-3px);border-color:#b9cba6;box-shadow:0 14px 30px #1730110f}
+.team-stat small{display:flex;align-items:center;gap:6px;color:var(--muted)}
+
+@media(max-width:760px){
+  .select-compact,.location-edit .select-compact{width:100%}
+  .admin-row .select-compact{margin-left:0;flex-basis:100%}
+  .confirm-modal{padding:28px 20px 22px}
+  .modal-actions{grid-template-columns:1fr}
+  .modal-actions .button-danger{order:-1}
+  .reviews-section .section-header-row .review-stars{align-items:flex-start;text-align:left}
+  .review-carousel .review-card blockquote{font-size:17px}
+  .my-reviews{grid-template-columns:1fr}
+  .select-menu .select-search input{font-size:16px}
+}
+
+/* ---------- Services and booking inside the customer dashboard ---------- */
+/* These pages are full-width public pages elsewhere; inside the dashboard they drop the header offset and outer gutters. */
+.dashboard-main .public-page{padding-top:0;min-height:0;background:transparent}
+.dashboard-main .public-page .wrap{width:100%}
+.dashboard-main .page-hero{min-height:0;padding:0 0 10px}
+.dashboard-main .page-hero-spark{display:none}
+.dashboard-main .booking-layout{padding:0 0 40px;gap:6%}
+.dashboard-main .catalog-grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}

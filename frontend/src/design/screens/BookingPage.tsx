@@ -9,7 +9,8 @@ import Icon from '../components/Icon';
 import { CountUp } from '../components/Motion';
 import Notice from '../components/Notice';
 import Product, { productFor } from '../components/Product';
-import { BOOKING_LEAD_DAYS } from '../data';
+import Select from '../components/Select';
+import { BOOKING_LEAD_DAYS, describeLocation, thanaOptions } from '../data';
 import { useEarliestBookingDate } from '../hooks/useEarliestBookingDate';
 import { useRemote } from '../hooks/useRemote';
 import type { Location, Service } from '../types';
@@ -32,10 +33,12 @@ export default function BookingPage({ id }: { id: string }) {
   const { user } = useAuth();
   const service = useAppSelector((state) => state.services.items.find((item) => item._id === id));
   const { data: locations } = useRemote<Location[]>('/locations', []);
+  const { data: thanas } = useRemote<string[]>('/dhakaThanas', []);
   const earliest = useEarliestBookingDate();
   const [date, setDate] = useState('');
   const [locationId, setLocationId] = useState('');
   const [address, setAddress] = useState('');
+  const [thana, setThana] = useState('');
   const [notes, setNotes] = useState('');
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
@@ -55,7 +58,7 @@ export default function BookingPage({ id }: { id: string }) {
     if (date < earliest) { setNotice(`Please choose a date at least ${BOOKING_LEAD_DAYS} days from today.`); return; }
     setBusy(true); setNotice('');
     try {
-      await api('/addAllBook', jsonOptions('POST', { serviceId: id, date, locationId: locationId || undefined, address, notes }));
+      await api('/addAllBook', jsonOptions('POST', { serviceId: id, date, locationId: locationId || undefined, address, thana, notes }));
       router.push('/bookList?booked=1');
     } catch (cause) { setNotice(errorMessage(cause)); setBusy(false); }
   }
@@ -86,13 +89,16 @@ export default function BookingPage({ id }: { id: string }) {
           <input required type="date" min={earliest || undefined} value={date} onChange={(event) => setDate(event.target.value)} />
           <small className="field-hint">Book at least {BOOKING_LEAD_DAYS} days ahead so we can plan your team.</small>
         </label>
-        {locations.length > 0 && <label>Location
-          <select required value={locationId} onChange={(event) => setLocationId(event.target.value)}>
-            <option value="">Choose your area</option>
-            {covered.map((location) => <option key={location._id} value={location._id}>{location.name}{location.city ? ' · ' + location.city : ''}</option>)}
-          </select>
-        </label>}
-        <label>Service address<input required placeholder="Street address, apartment, floor" value={address} onChange={(event) => setAddress(event.target.value)} /></label>
+        {locations.length > 0 && <Select label="Service area" required placeholder="Choose your area" value={locationId}
+          options={covered.map((location) => ({ value: location._id, label: location.name, hint: describeLocation(location) }))}
+          onChange={(next) => {
+            setLocationId(next);
+            // Start the thana from the area, which the customer can still change.
+            const area = covered.find((location) => location._id === next);
+            if (area?.thana && thanas.includes(area.thana)) setThana(area.thana);
+          }} />}
+        <Select label="Thana (Dhaka)" required searchable placeholder="Choose your thana" value={thana} options={thanaOptions(thanas)} onChange={setThana} />
+        <label>Service address<input required placeholder="House, road, apartment, floor" value={address} onChange={(event) => setAddress(event.target.value)} /></label>
         <label>Anything we should know?<textarea rows={4} placeholder="Tell us about your space or any special requests" value={notes} onChange={(event) => setNotes(event.target.value)} /></label>
         <button className="button" disabled={busy} type="submit"><span>{busy ? 'Sending request…' : user ? 'Request this clean' : 'Sign in to request'}</span><Icon name="arrowUp" size={19} /></button>
       </form>

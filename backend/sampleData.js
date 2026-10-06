@@ -41,9 +41,9 @@ function sampleData() {
       { name: 'Taylor M.', rating: 5, comments: 'Coming home to a space this fresh made my whole week.', status: 'Approved' },
       { name: 'Jordan L.', rating: 5, comments: 'The little details made the biggest difference.', status: 'Approved' }
     ],
-    admin: [{ email: 'admin@dependableclean.demo' }],
+    admin: [{ email: 'admin@dependableclean.demo', role: 'superAdmin' }],
     // Only the local preview uses these. Admins add real locations from the dashboard.
-    location: [{ name: 'Downtown', city: 'City center' }, { name: 'Riverside', city: 'East side' }, { name: 'North Hills', city: 'North side' }]
+    location: [{ name: 'Gulshan 1', city: 'Dhaka', thana: 'Gulshan', address: 'Gulshan Avenue' }, { name: 'Dhanmondi Lake', city: 'Dhaka', thana: 'Dhanmondi', address: 'Road 27' }, { name: 'Uttara Sector 7', city: 'Dhaka', thana: 'Uttara West', address: 'Sector 7' }]
   };
 }
 
