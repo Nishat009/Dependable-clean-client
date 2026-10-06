@@ -1,0 +1,79 @@
+/* Service details, booking extras, locations, review moderation and team screens. Loaded after the base styles. */
+
+/* Keep the hero photos on their own layers so slide changes do not repaint (and flicker) the page. */
+.hs-slide{will-change:transform,opacity}
+.hs-slide .product{backface-visibility:hidden}
+
+/* Light placeholder while the browser reads the session, in the dashboard's own colors. */
+.dashboard-loading{display:flex;align-items:center;justify-content:center;gap:12px;min-height:70vh;color:#5d6b59;font-weight:700;font-size:14px}
+.dashboard-loading .loading-spark{font-size:26px;color:#7da32c;display:inline-block}
+
+/* Service cards */
+.service-card-facts{display:flex;flex-wrap:wrap;gap:8px 16px;list-style:none;margin:0 0 16px;padding:0}
+.service-card-facts li{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#55644f}
+.service-card-facts svg{color:#7da32c}
+
+/* Booking page */
+.booking-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 26px;max-width:560px}
+.booking-facts .booking-feature{margin-top:20px}
+.included{margin-top:38px;max-width:560px}
+.included h2{font-size:22px;margin:0 0 14px}
+.included ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.included li{display:flex;align-items:flex-start;gap:10px;font-size:14px;line-height:1.45;color:#3a4737}
+.included li svg{flex:none;margin-top:2px;color:#fff;background:#7da32c;border-radius:50%;padding:3px;width:20px;height:20px}
+.booking-areas{display:flex;align-items:center;gap:8px;margin-top:26px;font-size:13px;font-weight:700;color:#55644f}
+.booking-areas svg{color:#7da32c;flex:none}
+.field-hint{display:block;font-size:11px;font-weight:600;color:var(--muted);line-height:1.5}
+
+/* Forms */
+.stack-form .check-row{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700}
+.stack-form .check-row input{width:18px;height:18px;padding:0;accent-color:#5d8122;flex:none}
+.field{display:grid;gap:9px}
+.field-label{font-size:12px;font-weight:800}
+.location-picker{border:1px solid #dce3d8;border-radius:6px;padding:16px 18px;margin:0;display:grid;gap:10px;background:#fbfcf8}
+.location-picker legend{font-size:12px;font-weight:800;padding:0 6px}
+.location-picker p{margin:0;font-size:12px;color:var(--muted);line-height:1.5}
+.location-options{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.location-options small{color:var(--muted);font-weight:600}
+.inline-link{font-weight:800;text-decoration:underline;text-underline-offset:3px;color:var(--ink)}
+
+/* Admin rows */
+.row-actions{display:flex;align-items:center;gap:8px;flex:none}
+.row-actions a.icon-button{color:var(--ink)}
+.icon-button:not(.danger):hover{background:#eef5e0}
+.row-price-inline{font-weight:700;color:var(--muted);margin-left:6px;font-size:12px}
+.row-main .row-note{font-style:italic}
+.small-button{border:1px solid #cfdac6;background:#fff;border-radius:100px;padding:8px 14px;font-size:11px;font-weight:800;color:var(--ink);transition:background .2s,border-color .2s}
+.small-button:hover{background:#f1f6e8}
+.small-button-primary{background:var(--lime);border-color:var(--lime)}
+.small-button-primary:hover{background:#c9f04a}
+.location-edit input{flex:1;min-width:0;border:1px solid #dce3d8;background:#f7f9f4;border-radius:5px;padding:11px 12px;font-size:14px;outline:none}
+.location-edit input:focus{border-color:#7da32c;box-shadow:0 0 0 3px #d7fb604d}
+.review-row{align-items:flex-start}
+.review-row .row-main strong{font-weight:600;line-height:1.5;margin-top:4px}
+
+/* Filter buttons on the reviews screen */
+.segmented{display:inline-flex;flex-wrap:wrap;gap:6px;background:#fff;border:1px solid #dce4d6;border-radius:100px;padding:5px;margin:4px 0 20px}
+.segmented button{border:0;background:transparent;border-radius:100px;padding:9px 15px;font-size:12px;font-weight:800;color:#5d6b59;display:flex;align-items:center;gap:7px}
+.segmented button span{background:#eef3e6;border-radius:100px;padding:2px 8px;font-size:10px;color:#4e5c4a}
+.segmented button.active{background:#19231b;color:var(--lime)}
+.segmented button.active span{background:#d7fb6026;color:var(--lime)}
+
+/* Stars */
+.stars{display:inline-flex;gap:2px;font-size:14px;line-height:1;letter-spacing:0}
+.stars i{font-style:normal;color:#cfd8c5}
+.stars i.on{color:#98ba36}
+.review-card-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+
+/* Status colors for reviews and the team */
+.status-approved{background:#e5f3d7;color:#3d782e}
+.status-rejected{background:#f9e5e3;color:#aa4c44}
+.status-no-account{background:#eef1ea;color:#66725f}
+
+@media(max-width:760px){
+  .booking-facts{grid-template-columns:1fr}
+  .row-actions{margin-left:auto}
+  .location-edit{flex-wrap:wrap}
+  .location-edit input{flex-basis:calc(100% - 65px)}
+  .review-row .status-badge{margin-left:0}
+}

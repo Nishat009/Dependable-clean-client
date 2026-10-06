@@ -12,6 +12,17 @@ People create an account with their name, email address and a password, then sig
 
 The API creates two demo accounts when it starts: `customer@dependableclean.demo` and `admin@dependableclean.demo`. The demo buttons on the sign-in page use them. Anyone can use them, so set `DEMO_ACCOUNTS=off` when the site is for real customers.
 
+## How the site works
+
+- **Reviews**: a customer's review is saved as Pending. Admins approve or reject it under **Reviews**, and only approved reviews appear on the home page. Customers see the status of their own reviews on **Write a review**.
+- **Team**: on **Team**, an admin adds a teammate by email. Someone new also needs a name and a temporary password, which creates their account so they can sign in straight away. Someone who already has an account only needs the email.
+- **Bookings**: the date must be at least 3 days from today. The form and the API both check this.
+- **Locations**: admins add, edit and remove the areas they serve under **Locations**. When any exist, customers choose one when booking. Each service covers every location unless the admin ticks specific ones on the service form.
+- **Services**: admins add and edit services, including what is included, team size, who it is ideal for and whether supplies are included. Run the seed again to add these details to the sample services already in your database.
+- Every successful API response is a 200 with a JSON body. Errors use 4xx or 5xx with `{ "error": "…" }`.
+
+The frontend is written in TypeScript. Screens live in `frontend/src/design/screens`, shared components in `frontend/src/design/components`, and API types in `frontend/src/design/types.ts`.
+
 Run `npm run build` to build the frontend, then `npm run start` to start both production processes.
 
 ## Deploy the API to Render

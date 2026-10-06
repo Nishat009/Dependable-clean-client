@@ -4,7 +4,10 @@ const { sampleData } = require('./sampleData');
 
 if (process.env.DNS_SERVERS) require('node:dns').setServers(process.env.DNS_SERVERS.split(',').map((server) => server.trim()));
 
+const detailFields = ['includes', 'teamSize', 'idealFor', 'suppliesIncluded'];
+
 // Adds the sample services, reviews and admin to MongoDB. Running it again does not create duplicates.
+// Sample services that were added before services had details get the missing detail fields.
 async function seed() {
   if (!process.env.MONGODB_URI) throw new Error('Set MONGODB_URI in backend/.env before seeding.');
   const client = new MongoClient(process.env.MONGODB_URI);
@@ -21,6 +24,11 @@ async function seed() {
     for (const [name, rows] of Object.entries(results)) {
       console.log(`${name}: ${rows.filter((row) => row.upsertedCount).length} added, ${rows.filter((row) => !row.upsertedCount).length} already there`);
     }
+    const details = await Promise.all(sample.service.map((service) => db.collection('service').updateOne(
+      { _id: service._id, includes: { $exists: false } },
+      { $set: Object.fromEntries(detailFields.map((field) => [field, service[field]])) }
+    )));
+    console.log(`service details: ${details.filter((row) => row.modifiedCount).length} filled in`);
   } finally {
     await client.close();
   }

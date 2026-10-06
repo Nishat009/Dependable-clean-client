@@ -6,3 +6,5 @@ out/
 
 # design reference recordings, not used by the site
 public/visuals/*.mp4
+next-env.d.ts
+*.tsbuildinfo
