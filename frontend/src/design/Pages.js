@@ -25,16 +25,18 @@ function useRemote(path, fallback = []) {
 
 export function LoginPage() {
   const router = useRouter();
-  const { user, signInWithGoogle, signInDemo } = useAuth();
-  const [error, setError] = useState('');
+  const { user, signIn, signInDemo } = useAuth();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const destination = typeof router.query.from === 'string' && router.query.from.startsWith('/') ? router.query.from : '/dashboard';
   useEffect(() => { if (user) router.replace(destination); }, [user, destination, router]);
-  async function googleLogin() {
-    try { setError(''); await signInWithGoogle(); router.push(destination); }
-    catch (cause) { setError(cause.message || 'Sign in could not be completed.'); }
+  function submit(event) {
+    event.preventDefault();
+    signIn({ name, email });
+    router.push(destination);
   }
   function demoLogin(role) { signInDemo(role); router.push(destination); }
-  return <><Header /><main className="auth-page"><div className="auth-art"><div className="auth-art-content"><span className="eyebrow"><span className="eyebrow-dot" /> YOUR FRESH START</span><h1>Good things happen in <em>clean spaces.</em></h1><p>Step into a simpler way to care for your space.</p><div className="auth-orbit"><Icon name="sparkle" size={75} /></div></div></div><div className="auth-form-side"><div className="auth-card"><span className="eyebrow"><span className="eyebrow-dot" /> WELCOME BACK</span><h2>Make yourself<br /><em>at home.</em></h2><p>Sign in to book a service and keep track of your fresh starts.</p><Notice message={error} type="error" onClose={() => setError('')} /><button className="button auth-primary" type="button" onClick={googleLogin}><span>Continue with Google</span><Icon name="arrowUp" size={19} /></button>{process.env.NODE_ENV === 'development' && <div className="demo-login"><span>LOCAL PREVIEW</span><button type="button" onClick={() => demoLogin('customer')}>Enter as a customer <Icon name="arrow" size={17} /></button><button type="button" onClick={() => demoLogin('admin')}>Enter as an admin <Icon name="arrow" size={17} /></button></div>}<small>By continuing, you can manage your bookings from one beautiful place.</small></div></div></main><Footer /></>;
+  return <><Header /><main className="auth-page"><div className="auth-art"><div className="auth-art-content"><span className="eyebrow"><span className="eyebrow-dot" /> YOUR FRESH START</span><h1>Good things happen in <em>clean spaces.</em></h1><p>Step into a simpler way to care for your space.</p><div className="auth-orbit"><Icon name="sparkle" size={75} /></div></div></div><div className="auth-form-side"><div className="auth-card"><span className="eyebrow"><span className="eyebrow-dot" /> WELCOME BACK</span><h2>Make yourself<br /><em>at home.</em></h2><p>Sign in to book a service and keep track of your fresh starts.</p><form onSubmit={submit} className="stack-form"><label>Your name<input required autoComplete="name" placeholder="Jamie Rivera" value={name} onChange={(event) => setName(event.target.value)} /></label><label>Email address<input required type="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={(event) => setEmail(event.target.value)} /></label><button className="button auth-primary" type="submit"><span>Continue</span><Icon name="arrowUp" size={19} /></button></form>{process.env.NODE_ENV === 'development' && <div className="demo-login"><span>LOCAL PREVIEW</span><button type="button" onClick={() => demoLogin('customer')}>Enter as a customer <Icon name="arrow" size={17} /></button><button type="button" onClick={() => demoLogin('admin')}>Enter as an admin <Icon name="arrow" size={17} /></button></div>}<small>By continuing, you can manage your bookings from one beautiful place.</small></div></div></main><Footer /></>;
 }
 
 export function ServicesPage() {
