@@ -66,7 +66,7 @@ export default function HeroSlider({ children }: { children?: ReactNode }) {
   const slide = heroSlides[index];
   const service = services.find((item) => item._id === slide.serviceId) || services[index % Math.max(services.length, 1)];
   const href = service ? '/book/' + service._id : '/book';
-  const stats: [string, string][] = [slide.stat, [service?.duration?.replace(' hours', 'h').replace(' hour', 'h') || 'Flexible', 'Visit length'], [formatMoney(service?.price), 'Starting from']];
+  const stats: [string, string][] = [[String(service?.includes?.length || 0), 'Scope items'], [service?.duration?.replace(' hours', 'h').replace(' hour', 'h') || 'Flexible', 'Visit length'], [formatMoney(service?.price), 'Starting from']];
 
   function onTabKey(event: KeyboardEvent) {
     const keys: Record<string, number> = { ArrowRight: 1, ArrowLeft: -1 };

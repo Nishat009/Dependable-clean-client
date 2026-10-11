@@ -1,74 +1,22 @@
+import { businessConfig } from '../data';
 import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '../Auth';
-import BookingRow from '../components/BookingRow';
-import ButtonLink from '../components/ButtonLink';
-import EmptyState from '../components/EmptyState';
-import Icon from '../components/Icon';
-import { CountUp } from '../components/Motion';
-import PageHeading from '../components/PageHeading';
 import { useRemote } from '../hooks/useRemote';
-import { useAppSelector } from '../../store';
-import type { Booking, Location, Review } from '../types';
-
-// The landing screen for the super admin and staff: a count of what needs a look, with links.
-function TeamOverview({ superAdmin }: { superAdmin: boolean }) {
-  const { user } = useAuth();
-  const services = useAppSelector((state) => state.services.items);
-  const { data: reviews } = useRemote<Review[]>(superAdmin ? '/reviewList' : '/teamReviews', []);
-  const { data: locations } = useRemote<Location[]>('/locations', []);
-  const { data: orders } = useRemote<Booking[]>(superAdmin ? '/orderList' : null, []);
-  const pendingReviews = reviews.filter((review) => review.status === 'Pending').length;
-  const openOrders = orders.filter((order) => order.status === 'Pending').length;
-  const tiles = [
-    ...(superAdmin ? [{ href: '/orderList', label: 'NEW ORDERS', value: openOrders, note: orders.length + ' orders in total' }] : []),
-    { href: '/manageReviews', label: 'PENDING REVIEWS', value: pendingReviews, note: superAdmin ? 'Waiting for your approval' : 'Waiting for the super admin' },
-    { href: '/addManage', label: 'SERVICES', value: services.length, note: superAdmin ? 'Add, edit or remove' : 'View only' },
-    { href: '/locations', label: 'DHAKA AREAS', value: locations.length, note: 'Where we clean' },
-  ];
-  return <>
-    <PageHeading eyebrow={superAdmin ? 'SUPER ADMIN' : 'STAFF VIEW'} title={<>Hello, <em>{user?.name?.split(' ')[0] || 'there'}.</em></>}
-      description={superAdmin ? 'Everything that needs your attention, in one place.' : 'You can look at services, locations and reviews. Changes and approvals are made by the super admin.'} />
-    <div className="stat-grid team-stats">{tiles.map((tile, index) => <Link key={tile.href} href={tile.href} className="team-stat">
-      <span>{String(index + 1).padStart(2, '0')} / {tile.label}</span>
-      <strong><CountUp value={tile.value} duration={900} /></strong>
-      <small>{tile.note} <Icon name="arrow" size={14} /></small>
-    </Link>)}</div>
-  </>;
-}
-
+import PageHeading from '../components/PageHeading';
+import Notice from '../components/Notice';
+import BookingRow from '../components/BookingRow';
+import { isManager, type Booking, type Review } from '../types';
 export default function DashboardPage() {
-  const { user } = useAuth();
-  if (user && user.role !== 'customer') return <TeamOverview superAdmin={user.role === 'superAdmin' || user.role === 'admin'} />;
-  return <CustomerOverview />;
-}
-
-function CustomerOverview() {
-  const { user } = useAuth();
-  const { data: bookings } = useRemote<Booking[]>(user ? '/bookingList' : null, []);
-  const upcoming = bookings.filter((item) => item.status !== 'Completed' && item.status !== 'Cancelled');
-  return <>
-    <PageHeading title={<>Welcome back, <em>{user?.name?.split(' ')[0] || 'friend'}.</em></>} description="A little overview of your cleaner, calmer space." />
-    <div className="dashboard-welcome">
-      <div>
-        <span className="eyebrow"><span className="eyebrow-dot" /> YOUR NEXT FRESH START</span>
-        <h2>A clean space is a good place to begin.</h2>
-        <p>Make room for the moments that matter. We&apos;ll take care of the reset.</p>
-        <ButtonLink href="/book">Book a clean</ButtonLink>
-      </div>
-      <span className="welcome-spark"><Icon name="sparkle" size={118} /></span>
-    </div>
-    <div className="stat-grid">
-      <div><span>01 / BOOKING</span><strong><CountUp value={bookings.length} duration={900} /></strong><small>Total requests</small></div>
-      <div><span>02 / UPCOMING</span><strong><CountUp value={upcoming.length} duration={900} /></strong><small>To look forward to</small></div>
-      <div><span>03 / CARE</span><strong><CountUp value={100} suffix="%" /></strong><small>Made for your space</small></div>
-    </div>
-    <div className="dashboard-section-head">
-      <div><span className="eyebrow"><span className="eyebrow-dot" /> ON THE HORIZON</span><h2>Your bookings</h2></div>
-      <Link href="/bookList" className="text-link">View all <Icon name="arrow" size={18} /></Link>
-    </div>
-    {upcoming.length
-      ? <div className="booking-list">{upcoming.slice(0, 2).map((item) => <BookingRow key={item._id} booking={item} />)}</div>
-      : <EmptyState title="Your next fresh start awaits" text="Choose a service, pick your date, and let us handle the rest." href="/book" action="Explore services" />}
-  </>;
+    const { user } = useAuth();
+    const owner = isManager(user?.role), staff = user?.role === 'staff';
+    const bookings = useRemote<Booking[]>(owner || staff ? '/orderList' : '/bookingList', []);
+    const reviews = useRemote<Review[]>(owner ? '/reviewList' : null, []);
+    const support = useRemote<{
+        unread: number;
+    }[]>('/support', []);
+    const today = new Intl.DateTimeFormat('en-CA', { timeZone: businessConfig.timezone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+    const upcoming = bookings.data.filter(b => !['completed', 'cancelled'].includes(b.status)).sort((a, b) => a.date.localeCompare(b.date));
+    const tiles = owner ? [['Pending requests', bookings.data.filter(b => b.status === 'requested').length, '/orderList'], ['Upcoming jobs', upcoming.length, '/orderList'], ['Unassigned bookings', upcoming.filter(b => !b.staffEmail).length, '/orderList'], ['Pending reviews', reviews.data.filter(r => r.status === 'Pending').length, '/manageReviews'], ['Unread tickets', support.data.reduce((n, c) => n + c.unread, 0), '/support']] : staff ? [['Today’s jobs', upcoming.filter(b => b.date === today).length, '/jobs'], ['Upcoming schedule', upcoming.length, '/jobs'], ['Completed jobs', bookings.data.filter(b => b.status === 'completed').length, '/jobs'], ['Unread tickets', support.data.reduce((n, c) => n + c.unread, 0), '/support']] : [['Upcoming cleaning', upcoming.length, '/bookList'], ['Booking history', bookings.data.length, '/bookList'], ['Unread tickets', support.data.reduce((n, c) => n + c.unread, 0), '/support']];
+    return <><PageHeading title={<>Hello, <em>{user?.name.split(' ')[0]}.</em></>} description="Your cleaning workspace. Booking requests await owner confirmation."/><Notice type="error" message={bookings.error || reviews.error || support.error}/>{bookings.loading ? <p>Loading your dashboard…</p> : <><div className="stat-grid">{tiles.map(([label, value, href]) => <Link className="team-stat" key={String(label)} href={String(href)}><span>{label}</span><strong>{value}</strong></Link>)}</div><h2>{staff ? 'Upcoming assigned jobs' : 'Upcoming cleaning'}</h2>{upcoming.slice(0, 5).map(b => <BookingRow key={b._id} booking={b}/>)}{!upcoming.length && <p>No upcoming cleaning jobs.</p>}</>}</>;
 }

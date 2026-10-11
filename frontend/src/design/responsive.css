@@ -34,7 +34,7 @@ section[id],footer[id]{scroll-margin-top:72px}
   .dashboard-sidebar nav::-webkit-scrollbar{display:none}
   .section-header-row{margin-bottom:30px}
   /* 16px stops iOS Safari from zooming into form fields */
-  .quick-book select,.quick-book input,.stack-form input,.stack-form textarea,.stack-form select,.admin-row select{font-size:16px}
+  .stack-form input,.stack-form textarea,.stack-form select,.admin-row select{font-size:16px}
   .footer-wordmark span{font-size:16.5vw}
 }
 @media(max-width:420px){

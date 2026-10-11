@@ -3,13 +3,16 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useAppSelector } from '../../store';
 import ButtonLink from '../components/ButtonLink';
+import DatePicker from '../components/DatePicker';
 import HeroSlider from '../components/HeroSlider';
 import Icon, { type IconName } from '../components/Icon';
 import { Carousel, CountUp, Marquee } from '../components/Motion';
 import Product from '../components/Product';
 import ReviewCard from '../components/ReviewCard';
 import SectionIntro from '../components/SectionIntro';
+import Select from '../components/Select';
 import ServiceCard from '../components/ServiceCard';
+import SupportChat from '../components/SupportChat';
 import { offers } from '../data';
 import { useEarliestBookingDate } from '../hooks/useEarliestBookingDate';
 import { useRemote } from '../hooks/useRemote';
@@ -45,8 +48,9 @@ function QuickBook() {
 
   return <form className="quick-book wrap" onSubmit={submit}>
     <div className="quick-book-intro"><span className="quick-book-icon"><Icon name="sparkle" size={24} /></span><div><strong>Book your fresh start</strong><small>Book at least 3 days ahead</small></div></div>
-    <label><span>SERVICE</span><select value={selected} onChange={(event) => setSelected(event.target.value)}><option value="">Choose a service</option>{services.map((service) => <option key={service._id} value={service._id}>{service.serviceName}</option>)}</select></label>
-    <label><span>PREFERRED DATE</span><input aria-label="Preferred date" type="date" min={earliest || undefined} value={date} onChange={(event) => setDate(event.target.value)} /></label>
+    <div className="quick-book-field"><span>SERVICE</span><Select className="quick-book-control" ariaLabel="Service" placeholder="Choose a service" value={selected}
+      options={services.map((service) => ({ value: service._id, label: service.serviceName }))} onChange={setSelected} /></div>
+    <div className="quick-book-field"><span>PREFERRED DATE</span><DatePicker className="quick-book-control" ariaLabel="Preferred date" placeholder="Pick a date" min={earliest || undefined} value={date} onChange={setDate} /></div>
     <button className="button quick-book-submit" type="submit"><span>Find my clean</span><Icon name="arrowUp" size={18} /></button>
   </form>;
 }
@@ -84,7 +88,7 @@ export default function Home() {
           <div className="about-stats" data-reveal="stagger">
             <div><strong><CountUp value={services.length} /></strong><span>Services to choose from</span></div>
             <div><strong><CountUp value={3} /></strong><span>Simple steps to book</span></div>
-            <div><strong><CountUp value={100} suffix="%" /></strong><span>Made for your space</span></div>
+
           </div>
           <div data-reveal><ButtonLink href="/book">Find your service</ButtonLink></div>
         </div>
@@ -104,7 +108,7 @@ export default function Home() {
       </div>
     </section>
 
-    <section className="section offers-section" id="offers">
+    {offers.length > 0 && <section className="section offers-section" id="offers">
       <div className="wrap">
         <div className="section-header-row" data-reveal>
           <SectionIntro label="FRESH OFFERS" title={<>A little extra,<br /><em>for a fresher home.</em></>} description="Seasonal savings on the cleans our clients book most. Swipe through and pick yours." />
@@ -118,13 +122,13 @@ export default function Home() {
           </article>)}
         </Carousel>
       </div>
-    </section>
+    </section>}
 
     <section className="section reviews-section" id="reviews">
       <div className="wrap">
         <div className="section-header-row" data-reveal>
           <SectionIntro label="GOOD WORDS" title={<>The feeling<br /><em>says it all.</em></>} description="Little moments after a big refresh, in our customers' own words." dark />
-          <div className="review-stars"><span>{[0, 1, 2, 3, 4].map((star) => <i key={star}>★</i>)}</span><small>{reviews.length ? reviews.length + (reviews.length === 1 ? ' review' : ' reviews') + ' from real orders' : 'Care worth coming home to'}</small></div>
+          <div className="review-stars"><span>{[0, 1, 2, 3, 4].map((star) => <i key={star}>★</i>)}</span><small>{reviews.length ? reviews.length + (reviews.length === 1 ? ' review' : ' reviews') + ' published reviews' : 'Care worth coming home to'}</small></div>
         </div>
         {reviews.length
           ? <Carousel label="Customer reviews" className="review-carousel" autoPlay={5500}>
@@ -133,5 +137,6 @@ export default function Home() {
           : <article className="review-card review-card-empty" data-reveal><Icon name="sparkle" size={30} /><h3>Your fresh start is next.</h3><p>Book a clean and tell us what a refreshed space feels like to you.</p><ButtonLink href="/book">Explore services</ButtonLink></article>}
       </div>
     </section>
+    <SupportChat />
   </main>;
 }
