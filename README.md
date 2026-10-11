@@ -1,47 +1,56 @@
-# Dependable Clean
+﻿# Dependable Clean
 
-Live website: [Dependable Clean](https://dependable-clean-client.vercel.app/)
+A single-business cleaning management app using the existing Next.js/React frontend and Express/MongoDB API.
 
-This is the combined Dependable Clean repository. It contains the Next.js app in `frontend/` and the Express API in `backend/`. The redesigned frontend lives in `frontend/src/design`; the previous UI is retained under `frontend/src/legacy` for reference.
+## Run locally
 
-## Run both applications
+Run `npm install`, then `npm run dev` from the repository root. Frontend: http://localhost:3000. API: http://localhost:5000.
 
-From this folder, run `npm install` once and then `npm run dev`. The frontend runs at http://localhost:3000 and the Express API runs at http://localhost:5000.
+Without MongoDB, development uses an **in-memory preview**. It resets on restart; use test data only. Demo Staff, Customer and Admin buttons are available in local development, with either preview storage or MongoDB. Set `DEMO_ACCOUNTS=off` to disable them. Production mode never enables demo sign-in, and previously created demo users are blocked there. Use a development database when testing demo accounts; demo actions affect the configured development data.
 
-For a local preview, no database setup is needed. The API serves sample services and stores bookings, reviews, and admin edits in memory until the server restarts. On the sign-in page, use the **Demo customer**, **Demo staff** or **Demo super admin** button. To use MongoDB, copy `backend/.env.example` to `backend/.env` and set `MONGODB_URI`. You can optionally set `DB_NAME`, `PORT`, and `CLIENT_ORIGIN`. If the connection fails with `querySrv ECONNREFUSED`, set `DNS_SERVERS=8.8.8.8,1.1.1.1`. To add the sample services, reviews, and the `admin@dependableclean.demo` admin to the database, run `npm run seed --workspace @dependable-clean/server`. Running it again does not add duplicates.
+For persistent data, copy `backend/.env.example` to `backend/.env` and set `MONGODB_URI`, `DB_NAME`, `CLIENT_ORIGIN` and a strong `AUTH_SECRET`. Production requires MongoDB. Set `NEXT_PUBLIC_API_URL` in the frontend environment to the API origin, then rebuild. Keep frontend and API on HTTPS in production.
 
-People create an account with their name, email address and a password, then sign in with the email and password. The API stores passwords as scrypt hashes and returns a signed token that lasts seven days. Booking, reviews and the bookings list need a signed-in user, and the order, service and admin tools need an admin. A user is an admin when their email address is in the `admin` collection, so an admin can promote someone from **Add admin**.
+## Owner setup and business configuration
 
-The API creates three demo accounts when it starts: `customer@dependableclean.demo`, `staff@dependableclean.demo` and `admin@dependableclean.demo` (the super admin). The demo buttons on the sign-in page use them. Anyone can use them, so set `DEMO_ACCOUNTS=off` when the site is for real customers.
+Set `OWNER_EMAIL` and `OWNER_NAME` in the backend environment, then run `npm run setup-owner --workspace @dependable-clean/server`. This prints a private, single-use setup link, valid for 24 hours. Open it to choose your password. The command refuses to reset an existing configured account or replace an existing real owner. It can retire the old seeded demo owner without deleting its records. Existing real owners can continue using their existing credentials.
 
-## How the site works
+`BUSINESS_TIMEZONE` (default `Asia/Dhaka`) and `BUSINESS_CURRENCY` (default `BDT`) are configured on the **API**; the frontend loads both from `/business`. Confirm the currency of existing service prices before launch; changing the setting does not convert stored amounts. Prices are snapshots in the configured business currency; do not change currency after live bookings without a deliberate data migration.
 
-- **Reviews**: a customer's review is saved as Pending. Admins approve or reject it under **Reviews**, and only approved reviews appear on the home page. Customers see the status of their own reviews on **Write a review**.
-- **Team**: on **Team**, an admin adds a teammate by email. Someone new also needs a name and a temporary password, which creates their account so they can sign in straight away. Someone who already has an account only needs the email.
-- **Bookings**: the date must be at least 3 days from today. The form and the API both check this.
-- **Locations**: admins add, edit and remove the areas they serve under **Locations**. When any exist, customers choose one when booking. Each service covers every location unless the admin ticks specific ones on the service form.
-- **Services**: admins add and edit services, including what is included, team size, who it is ideal for and whether supplies are included. Run the seed again to add these details to the sample services already in your database.
-- Every successful API response is a 200 with a JSON body. Errors use 4xx or 5xx with `{ "error": "…" }`.
+From the owner's dashboard:
 
-The frontend is written in TypeScript. Screens live in `frontend/src/design/screens`, shared components in `frontend/src/design/components`, and API types in `frontend/src/design/types.ts`.
+- Add supported service areas before accepting requests, and configure services, prices, scope and active status.
+- Add actual contact details, FAQ, cancellation policy and current offer terms under **Business content**. These appear publicly in the footer. Empty content stays unpublished; no contact details or discounts are invented. Offer terms are informational; each service's configured price is the booking price.
+- Invite staff under **Team** and privately share the generated setup link. Staff choose their own passwords; no temporary passwords are shown or stored. Existing accounts retain their current password unless they use the setup link. Invitations expire after 24 hours. Create another invitation to replace an expired link.
+- Review booking requests, confirm them, then assign active staff. Approve a requested reschedule or cancel a booking as appropriate. Mark a request handled to dismiss a rejected request; use support to explain the decision.
 
-Run `npm run build` to build the frontend, then `npm run start` to start both production processes.
+`BUSINESS_EMAIL` and `BUSINESS_PHONE` provide initial contact defaults, until the owner saves Business content. Do not run the demo seed against a live business database: it contains sample services and reviews. Existing records are preserved; old booking status labels are normalized when read. Old bookings retain their stored name and price; scope cannot be reconstructed reliably for bookings created before snapshots existed.
 
-## Deploy the API to Render
+## Roles and workflows
 
-`render.yaml` describes the API as a Render web service. In the Render dashboard, choose **New → Blueprint** and select this repository. Render asks for two values and generates `AUTH_SECRET`, which signs sign-in tokens:
+All roles share the dashboard shell and land on `/dashboard` after login. Legacy screen URLs remain available for existing links.
 
-- `MONGODB_URI`: the connection string for your MongoDB Atlas cluster. In Atlas, open **Network Access** and add `0.0.0.0/0`, because Render does not use fixed IP addresses. Without it the deploy fails with `tlsv1 alert internal error ... SSL alert number 80`.
-- `CLIENT_ORIGIN`: the URL where the frontend is hosted, for example `https://dependable-clean.vercel.app`.
+- `super_admin`: services/pricing, published offer terms, service areas, team access, all bookings and assignments, review moderation, private customer support, reports and activity.
+- `staff`: active service/area information, their assigned jobs and schedule, permitted job status updates and internal notes, own profile.
+- `customer`: cleaning requests, own booking details/history, cancellation/reschedule requests, one review per completed booking, private owner support and own profile.
 
-When the deploy finishes, `https://<service>.onrender.com/health` should return `"mode":"database"`. Set `NEXT_PUBLIC_API_URL` to the service URL wherever the frontend is built, then rebuild the frontend. On the free plan the service sleeps after 15 minutes without traffic, so the first request after a pause can take about 30 seconds.
+Backend checks use the current database account and role on every protected request. Role and ownership cannot be chosen by sending a customer ID or a role in a request. Deactivated staff immediately lose API access, including existing tokens; their staff record and assigned-job history stay intact. Staff cannot access support, moderation, reports, team administration, or unassigned jobs.
 
-The frontend uses Next.js 16, React 19, and Redux Toolkit. The API uses Express 5 and MongoDB Node driver 6. Node.js 20.13 or newer is required.
+Bookings follow `requested → confirmed → assigned → in_progress → completed`, with cancellation before work begins. Staff may move only their assigned jobs from `assigned` to `in_progress`, then `completed`. Requests require a real date at least three business-calendar days ahead, a supported area with a matching thana, and an address. Service name, price and scope are copied into the booking. A request is not confirmed until the owner confirms it. Internal notes are omitted from customer API responses.
 
-### Roles
+Support messages persist in MongoDB. Polling runs every 10 seconds, with unread counts, per-message read state, timestamps and open/resolved status. Sending is limited to 10 messages per account per minute in this single-server deployment. No additional infrastructure is required.
 
-- **Super admin** manages everything: orders, services, Dhaka locations, review approval and the team. There is one; everyone added from the Team page joins as staff.
-- **Staff** can see services, locations and who has written each review, but cannot approve reviews, change services or see orders.
-- **Customers** browse services, book them and review their own orders, one review per order.
+Reviews start pending and require the submitting customer's completed booking. A unique booking-review index prevents duplicate reviews. Only approved reviews are public. The owner can approve, reject or hide them. Legacy reviews without a status retain their previous published behavior.
 
-Locations are always in Dhaka. The thana list comes from the API's `/dhakaThanas`, which combines the Dhaka Metropolitan Police thanas with the Dhaka district upazilas from bdapis.com, cached for a day.
+Reports distinguish **booking value** from **recorded payments**. This app does not implement payment collection; booking value is never labeled revenue. Activity records track staff access changes, booking updates/assignments, service/area changes, business content and review moderation.
+
+Management lists provide search/filter controls and client-side pagination, appropriate to a small business.
+
+## Verification
+
+- `npm test`: API integration and rendered-component tests.
+- `npm run build`: frontend production build and TypeScript checking.
+- `npm run build --workspace @dependable-clean/server`: backend syntax checks.
+
+API tests launch an isolated preview server and exercise direct HTTP requests: all roles' management restrictions, ownership, invalid booking input, status transitions, assignments, rescheduling, internal-note privacy, review eligibility/moderation, support privacy/read counts/rate limits, profile privilege escalation attempts, setup-link reuse and deactivated staff tokens. Component tests verify role navigation, exact sidebar selection and `/dashboard` login redirects. These tests do not connect to your production database or send invitations/messages to real people.
+
+Before launch, configure MongoDB, owner access, business timezone/currency, API/frontend origins, real contact/policy content, services and areas. The automated checks use the Mongo-compatible preview adapter; verify database connectivity and indexes in your deployment. If historic duplicate reviews exist for the same booking, preserve them for manual reconciliation before creating the unique review index. Native browser interaction and live MongoDB testing require a local browser/database environment.
