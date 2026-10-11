@@ -22,19 +22,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [ready, setReady] = useState(false);
 
+  useEffect(() => { setUser(readSession()?.user || null); setReady(true); }, []);
   useEffect(() => {
-    const session = readSession();
-    setUser(session?.user || null);
-    setReady(true);
-    if (!session) return;
-    // Refresh the role in case an admin was added or removed since the last visit.
-    api<User>('/me').then((fresh) => {
-      storeSession({ ...session, user: fresh });
-      setUser(fresh);
-    }).catch((error: unknown) => {
-      if (error instanceof ApiError && error.status === 401) { storeSession(null); setUser(null); }
-    });
-  }, []);
+    if (!user?.email) return;
+    let active = true;
+    const refresh = async () => {
+      const current = readSession();
+      if (!current) return;
+      try {
+        const fresh = await api<User>('/me');
+        // Keep the same user object when nothing changed, so screens that depend on it do not reload every 30 seconds.
+        if (active && readSession()?.token === current.token) {
+          storeSession({ ...current, user: fresh });
+          setUser((previous) => previous && JSON.stringify(previous) === JSON.stringify(fresh) ? previous : fresh);
+        }
+      } catch (error) {
+        if (active && error instanceof ApiError && error.status === 401) { storeSession(null); setUser(null); }
+      }
+    };
+    refresh();
+    const timer = window.setInterval(refresh, 30000);
+    return () => { active = false; window.clearInterval(timer); };
+  }, [user?.email]);
 
   function begin(session: Session): User {
     storeSession(session);

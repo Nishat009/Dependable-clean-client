@@ -19,6 +19,8 @@ export function useRemote<T>(path: string | null, fallback: T): Remote<T> {
   useEffect(() => {
     if (!path) return undefined;
     let active = true;
+    setLoading(true);
+    setError('');
     api<T>(path)
       .then((value) => { if (active) { setData(value ?? fallback); setError(''); } })
       .catch((cause: unknown) => { if (active) setError(errorMessage(cause)); })

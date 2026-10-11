@@ -1,6 +1,5 @@
 import { configureStore, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { useDispatch, useSelector } from 'react-redux';
-import { demoServices } from './design/data';
 import type { Service } from './design/types';
 
 interface ServicesState {
@@ -11,7 +10,7 @@ interface ServicesState {
 
 const servicesSlice = createSlice({
   name: 'services',
-  initialState: { items: demoServices, loaded: false } as ServicesState,
+  initialState: { items: [], loaded: false } as ServicesState,
   reducers: {
     setServices(state, action: PayloadAction<Service[]>) {
       state.items = action.payload;
