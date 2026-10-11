@@ -9,10 +9,8 @@ export interface SelectOption {
   disabled?: boolean;
 }
 
-interface SelectProps {
-  value: string;
+interface BaseProps {
   options: SelectOption[];
-  onChange(value: string): void;
   /** The visible field label. Leave it out and pass `ariaLabel` for a compact control inside a row. */
   label?: string;
   ariaLabel?: string;
@@ -21,12 +19,29 @@ interface SelectProps {
   /** Shows a filter box at the top of the list, for long lists such as the Dhaka thanas. */
   searchable?: boolean;
   compact?: boolean;
+  disabled?: boolean;
   className?: string;
 }
 
+interface SingleProps extends BaseProps {
+  multiple?: false;
+  value: string;
+  onChange(value: string): void;
+}
+
+/** Lets several options be ticked. The list stays open while choosing, and an empty value shows the placeholder. */
+interface MultipleProps extends BaseProps {
+  multiple: true;
+  value: string[];
+  onChange(value: string[]): void;
+}
+
+type SelectProps = SingleProps | MultipleProps;
+
 // A dropdown in the site's colors, used in place of the browser's own <select>.
 // It keeps keyboard support (arrows, Enter, Escape, typing to filter) and blocks form submit when required and empty.
-export default function Select({ value, options, onChange, label, ariaLabel, placeholder = 'Choose…', required, searchable, compact, className = '' }: SelectProps) {
+export default function Select(props: SelectProps) {
+  const { options, label, ariaLabel, placeholder = 'Choose…', required, searchable, compact, disabled, className = '' } = props;
   const id = useId();
   const root = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -36,7 +51,10 @@ export default function Select({ value, options, onChange, label, ariaLabel, pla
   const [upward, setUpward] = useState(false);
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(-1);
-  const selected = options.find((option) => option.value === value);
+  const values = props.multiple ? props.value : [props.value];
+  const isSelected = (option: SelectOption) => values.includes(option.value);
+  const picked = options.filter(isSelected);
+  const summary = !picked.length ? '' : picked.length <= 2 ? picked.map((option) => option.label).join(', ') : `${picked[0].label} +${picked.length - 1} more`;
   const visible = query ? options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase())) : options;
 
   useEffect(() => {
@@ -53,7 +71,7 @@ export default function Select({ value, options, onChange, label, ariaLabel, pla
     const box = trigger.current?.getBoundingClientRect();
     setUpward(Boolean(box && window.innerHeight - box.bottom < 300 && box.top > window.innerHeight - box.bottom));
     setQuery('');
-    setActive(Math.max(0, options.findIndex((option) => option.value === value)));
+    setActive(Math.max(0, options.findIndex(isSelected)));
     setOpen(true);
     if (searchable) requestAnimationFrame(() => search.current?.focus());
   }
@@ -63,8 +81,8 @@ export default function Select({ value, options, onChange, label, ariaLabel, pla
   }
   function choose(option: SelectOption) {
     if (option.disabled) return;
-    onChange(option.value);
-    hide();
+    if (props.multiple) props.onChange(isSelected(option) ? props.value.filter((item) => item !== option.value) : [...props.value, option.value]);
+    else { props.onChange(option.value); hide(); }
   }
   function step(from: number, direction: 1 | -1) {
     for (let index = from + direction; index >= 0 && index < visible.length; index += direction) {
@@ -90,24 +108,29 @@ export default function Select({ value, options, onChange, label, ariaLabel, pla
     <div className="select-anchor">
       <button type="button" ref={trigger} className="select-trigger" aria-haspopup="listbox" aria-expanded={open} aria-controls={id + '-list'}
         aria-labelledby={label ? labelId + ' ' + id + '-value' : undefined} aria-label={label ? undefined : ariaLabel}
-        onClick={() => open ? hide() : show()}>
-        <span id={id + '-value'} className={selected ? 'select-value' : 'select-value select-placeholder'}>{selected ? selected.label : placeholder}</span>
+        disabled={disabled} onClick={() => open ? hide() : show()}>
+        <span id={id + '-value'} className={summary ? 'select-value' : 'select-value select-placeholder'}>{summary || placeholder}</span>
         <Icon name="chevron" size={17} className="select-chevron" />
       </button>
       {/* Lets the browser's own required check stop the form, and point at this field. */}
-      {required && <input className="select-required" tabIndex={-1} aria-hidden="true" required value={value} onChange={() => {}} onInvalid={() => trigger.current?.focus()} />}
-      {open && <div className={'select-menu' + (upward ? ' is-upward' : '')}>
+      {required && <input className="select-required" tabIndex={-1} aria-hidden="true" required value={values.join(',')} onChange={() => {}} onInvalid={() => trigger.current?.focus()} />}
+      {open && <div className={'select-menu' + (upward ? ' is-upward' : '') + (props.multiple ? ' is-multiple' : '')}>
         {searchable && <div className="select-search"><Icon name="search" size={16} /><input ref={search} value={query} placeholder="Type to search" aria-label="Search the list"
           onChange={(event) => { setQuery(event.target.value); setActive(0); }} /></div>}
-        <ul role="listbox" id={id + '-list'} ref={list} aria-labelledby={label ? labelId : undefined} aria-label={label ? undefined : ariaLabel}>
-          {visible.map((option, index) => <li key={option.value} role="option" aria-selected={option.value === value} aria-disabled={option.disabled || undefined}
-            data-active={index === active} className={(option.value === value ? 'is-selected' : '') + (option.disabled ? ' is-disabled' : '')}
+        <ul role="listbox" id={id + '-list'} ref={list} aria-labelledby={label ? labelId : undefined} aria-label={label ? undefined : ariaLabel} aria-multiselectable={props.multiple || undefined}>
+          {visible.map((option, index) => <li key={option.value} role="option" aria-selected={isSelected(option)} aria-disabled={option.disabled || undefined}
+            data-active={index === active} className={(isSelected(option) ? 'is-selected' : '') + (option.disabled ? ' is-disabled' : '')}
             onMouseEnter={() => !option.disabled && setActive(index)} onMouseDown={(event) => event.preventDefault()} onClick={() => choose(option)}>
+            {props.multiple && <span className="select-box" aria-hidden="true">{isSelected(option) && <Icon name="check" size={12} />}</span>}
             <span className="select-option-text"><span>{option.label}</span>{option.hint && <small>{option.hint}</small>}</span>
-            {option.value === value && <Icon name="check" size={16} />}
+            {!props.multiple && isSelected(option) && <Icon name="check" size={16} />}
           </li>)}
           {!visible.length && <li className="select-empty" role="presentation">Nothing matches “{query}”.</li>}
         </ul>
+        {props.multiple && props.value.length > 0 && <div className="select-foot">
+          <span>{props.value.length} selected</span>
+          <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => props.onChange([])}>Clear</button>
+        </div>}
       </div>}
     </div>
   </div>;

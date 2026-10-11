@@ -7,8 +7,10 @@
     "dev": "node --watch index.js",
     "start-dev": "node --watch index.js",
     "start": "node index.js",
-    "build": "node --check index.js && node --check auth.js && node --check demoDb.js && node --check validation.js && node --check sampleData.js && node --check seed.js",
-    "seed": "node seed.js"
+    "build": "node --check index.js && node --check auth.js && node --check demoDb.js && node --check validation.js && node --check sampleData.js && node --check seed.js && node --check permissions.js && node --check management.js && node --check setup-owner.js",
+    "seed": "node seed.js",
+    "test": "node --test management.test.js",
+    "setup-owner": "node setup-owner.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

@@ -7,7 +7,7 @@ import type { Service } from '../types';
 export function useReloadServices(): () => Promise<void> {
   const dispatch = useAppDispatch();
   return useCallback(async () => {
-    const services = await api<Service[]>('/services');
+    const services = await api<Service[]>('/serviceList');
     if (Array.isArray(services)) dispatch(setServices(services));
   }, [dispatch]);
 }
