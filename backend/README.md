@@ -1,5 +1,5 @@
-# Dependable Clean API
+﻿# API
 
-This API uses Express 5 and MongoDB Node driver 6. Run both the API and client with `npm run dev` from the combined `Dependable-clean` folder.
+See [the project README](../README.md) for environment configuration, owner setup, permissions, booking workflows and verification.
 
-Before starting, copy `.env.example` to `.env` and set the MongoDB credentials. The API defaults to port 5000. See the parent README for the combined setup.
+Run `npm test` from the repository root for direct API and UI component checks. The API requires MongoDB in production; local preview data is temporary.
