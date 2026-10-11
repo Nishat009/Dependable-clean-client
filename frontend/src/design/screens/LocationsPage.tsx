@@ -5,16 +5,20 @@ import EmptyState from '../components/EmptyState';
 import Icon from '../components/Icon';
 import Notice from '../components/Notice';
 import PageHeading from '../components/PageHeading';
+import SearchField from '../components/SearchField';
 import Select from '../components/Select';
+import StatusBadge from '../components/StatusBadge';
 import { useRemote } from '../hooks/useRemote';
 import { describeLocation, thanaOptions } from '../data';
 import { useAuth } from '../Auth';
-import type { Location, LocationInput } from '../types';
+import Pagination from '../components/Pagination';
+import { isManager, type Location, type LocationInput } from '../types';
 
 const blank: LocationInput = { name: '', thana: '', address: '' };
 const fieldsOf = (location: Location): LocationInput => ({ name: location.name, thana: location.thana || '', address: location.address || '' });
 
-function LocationRow({ location, thanas, canEdit, onSave, onDelete }: { location: Location; thanas: string[]; canEdit: boolean; onSave(fields: LocationInput): Promise<void>; onDelete(): void }) {
+function LocationRow({ location, thanas, canEdit, onSave, onToggle, onDelete }: { location: Location; thanas: string[]; canEdit: boolean; onSave(fields: LocationInput): Promise<void>; onToggle(): void; onDelete(): void }) {
+  const active = location.active !== false;
   const [editing, setEditing] = useState(false);
   const [fields, setFields] = useState(() => fieldsOf(location));
 
@@ -42,7 +46,9 @@ function LocationRow({ location, thanas, canEdit, onSave, onDelete }: { location
   return <article className="admin-row">
     <div className="row-icon"><Icon name="pin" size={22} /></div>
     <div className="row-main"><strong>{location.name}</strong><span>{describeLocation(location)}</span></div>
+    <StatusBadge status={active ? 'Active' : 'Inactive'} />
     {canEdit && <div className="row-actions">
+      <button type="button" className={'small-button' + (active ? ' small-button-danger' : ' small-button-primary')} onClick={onToggle}>{active ? 'Deactivate' : 'Activate'}</button>
       <button className="icon-button" type="button" aria-label={'Edit ' + location.name} title="Edit" onClick={() => setEditing(true)}><Icon name="edit" size={19} /></button>
       <button className="icon-button danger" type="button" aria-label={'Delete ' + location.name} title="Delete" onClick={onDelete}><Icon name="trash" size={19} /></button>
     </div>}
@@ -51,14 +57,17 @@ function LocationRow({ location, thanas, canEdit, onSave, onDelete }: { location
 
 // Service areas inside Dhaka. The super admin manages them here, or straight from the service form.
 export default function LocationsPage() {
-  const { data: locations, loading, refresh } = useRemote<Location[]>('/locations', []);
+  const { data: locations, loading, error: loadError, refresh } = useRemote<Location[]>('/locationList', []);
   const { data: thanas } = useRemote<string[]>('/dhakaThanas', []);
   const { user } = useAuth();
-  const isSuperAdmin = user?.role === 'superAdmin' || user?.role === 'admin';
+  const isSuperAdmin = isManager(user?.role);
   const [fields, setFields] = useState<LocationInput>(blank);
   const [pendingDelete, setPendingDelete] = useState<Location | null>(null);
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
+  const [search,setSearch] = useState('');
+  const [page,setPage] = useState(1);
+  const visible = locations.filter(l => [l.name,l.thana].join(' ').toLowerCase().includes(search.toLowerCase()));
 
   async function attempt(action: () => Promise<unknown>, success: string) {
     setError(''); setNotice('');
@@ -77,9 +86,9 @@ export default function LocationsPage() {
   }
 
   return <>
-    <PageHeading eyebrow={isSuperAdmin ? 'ADMIN TOOLS' : 'STAFF VIEW'} title={<>Where we <em>clean.</em></>} description="Our service areas inside Dhaka. Customers choose one when they book, and each service can cover all of them or only some." />
+    <PageHeading eyebrow={isSuperAdmin ? 'ADMIN TOOLS' : 'STAFF VIEW'} title={<>Where we <em>clean.</em></>} description="Our service areas inside Dhaka. Customers can book any service in an active area. Switch an area off to stop new bookings there." />
     <Notice message={notice} onClose={() => setNotice('')} />
-    <Notice message={error} type="error" onClose={() => setError('')} />
+    <Notice message={error || loadError} type="error" onClose={() => setError('')} />
     {isSuperAdmin && <div className="form-card dashboard-form">
       <span className="eyebrow"><span className="eyebrow-dot" /> NEW LOCATION · DHAKA</span>
       <h2>Add an area.</h2>
@@ -92,13 +101,17 @@ export default function LocationsPage() {
         <button className="button" type="submit"><span>Add location</span><Icon name="arrowUp" size={18} /></button>
       </form>
     </div>}
-    <div className="dashboard-section-head"><h2>Current locations</h2><span className="result-count">{locations.length} AREAS</span></div>
-    {locations.length ? <div className="admin-list">{locations.map((location) => <LocationRow key={location._id} location={location} thanas={thanas} canEdit={isSuperAdmin}
+    <div className="dashboard-section-head"><h2>Current locations</h2><span className="result-count">{locations.filter((l) => l.active !== false).length} OF {locations.length} ACTIVE</span></div>
+<SearchField className="list-search" ariaLabel="Search areas" placeholder="Search by area or thana" value={search} onChange={value=>{setSearch(value);setPage(1);}} />
+    {loading && <p>Loading service areas...</p>}
+    {visible.length ? <div className="admin-list">{visible.slice((page-1)*10,page*10).map((location) => <LocationRow key={location._id} location={location} thanas={thanas} canEdit={isSuperAdmin}
       onSave={(next) => attempt(() => api('/updateLocation/' + location._id, jsonOptions('PATCH', next)), 'Location updated.')}
+      onToggle={() => attempt(() => api('/locationStatus/' + location._id, jsonOptions('PATCH', { active: location.active === false })), location.name + (location.active === false ? ' is active again.' : ' is now inactive.')).catch(() => {})}
       onDelete={() => setPendingDelete(location)} />)}</div>
-      : !loading && <EmptyState title="No locations yet" text="Until you add one, customers can book without choosing an area." />}
+      : !loading && <EmptyState title="No locations yet" text="Customers cannot book until at least one area is active." />}
+    <Pagination page={page} pageSize={10} total={visible.length} noun="locations" onChange={setPage} />
     {pendingDelete && <ConfirmModal title="Remove this location?" confirmLabel="Remove location" onCancel={() => setPendingDelete(null)} onConfirm={() => remove(pendingDelete)}>
-      <strong>{pendingDelete.name}</strong> will be taken off every service that covers it. Existing orders keep their address.
+      <strong>{pendingDelete.name}</strong> will be removed for good. Existing orders keep their address. To pause it instead, deactivate it.
     </ConfirmModal>}
   </>;
 }
