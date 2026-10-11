@@ -36,7 +36,7 @@ const services = [
 
 function sampleData() {
   return {
-    service: services.map((service, index) => ({ _id: new ObjectId('65000000000000000000000' + (index + 1)), ...service, suppliesIncluded: true, locations: [] })),
+    service: services.map((service, index) => ({ _id: new ObjectId('65000000000000000000000' + (index + 1)), ...service, suppliesIncluded: true })),
     review: [
       { name: 'Taylor M.', rating: 5, comments: 'Coming home to a space this fresh made my whole week.', status: 'Approved' },
       { name: 'Jordan L.', rating: 5, comments: 'The little details made the biggest difference.', status: 'Approved' }
