@@ -5,7 +5,7 @@
 .select-anchor{position:relative}
 /* Form rows and list rows animate in, which gives each its own layer; lift the one holding an open menu above the rest. */
 .select-field.is-open{z-index:50}
-:is(.stack-form,.admin-list,.form-two,.location-picker)>:has(>.select-field.is-open),:is(.stack-form,.admin-list)>:has(.select-field.is-open){position:relative;z-index:50}
+:is(.stack-form,.admin-list,.form-two)>:has(>.select-field.is-open),:is(.stack-form,.admin-list)>:has(.select-field.is-open){position:relative;z-index:50}
 .select-trigger{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #dce3d8;background:#f7f9f4;border-radius:5px;padding:14px 15px;color:var(--ink);font-size:14px;font-weight:600;text-align:left;cursor:pointer;transition:border-color .2s,box-shadow .2s,background .2s}
 .select-trigger:hover{border-color:#b9c9ad;background:#fbfcf8}
 .select-trigger:focus-visible,.select-field.is-open .select-trigger{outline:none;border-color:#7da32c;box-shadow:0 0 0 3px #d7fb604d;background:#fff}
@@ -35,6 +35,77 @@
 .select-compact .select-trigger{padding:10px 12px;font-size:12px;font-weight:700;background:#fff}
 .select-compact .select-menu{left:auto;min-width:180px}
 @keyframes select-in{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:none}}
+.select-trigger:disabled{opacity:.55;cursor:wait}
+.select-menu.is-multiple li{justify-content:flex-start}
+.select-box{flex:none;width:18px;height:18px;border:1.5px solid #ffffff40;border-radius:4px;display:grid;place-items:center;transition:background .15s,border-color .15s}
+.select-menu li.is-selected .select-box{background:var(--lime);border-color:var(--lime)}
+.select-menu li.is-selected .select-box svg{color:#19231b}
+.select-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 14px;border-top:1px solid #ffffff14;font-size:12px;font-weight:600;color:#9fae99}
+.select-foot button{border:0;background:transparent;color:var(--lime);font-size:12px;font-weight:800;cursor:pointer;padding:2px 0}
+.select-foot button:hover{text-decoration:underline;text-underline-offset:3px}
+.assign-select{width:220px}
+
+/* ---------- Search box (components/SearchField.tsx) ---------- */
+.search-field{display:grid;gap:9px;min-width:0}
+.search-box{position:relative;display:flex;align-items:center}
+.search-box .search-icon{position:absolute;left:15px;color:#7c8b76;pointer-events:none;transition:color .2s}
+.search-box input{width:100%;border:1px solid #dce3d8;background:#f7f9f4;border-radius:5px;padding:14px 42px 14px 43px;color:var(--ink);font-size:14px;font-weight:600;outline:none;-webkit-appearance:none;appearance:none;transition:border-color .2s,box-shadow .2s,background .2s}
+.search-box input::placeholder{color:#8a9686;font-weight:500}
+.search-box input::-webkit-search-cancel-button,.search-box input::-webkit-search-decoration{-webkit-appearance:none;appearance:none}
+.search-box input:hover{border-color:#b9c9ad;background:#fbfcf8}
+.search-box input:focus{border-color:#7da32c;box-shadow:0 0 0 3px #d7fb604d;background:#fff}
+.search-box:focus-within .search-icon{color:#5d8122}
+.search-clear{position:absolute;right:8px;width:28px;height:28px;border:0;border-radius:50%;background:#e8eee2;color:#4e5c4a;display:grid;place-items:center;cursor:pointer;animation:select-in .15s var(--ease) both;transition:background .2s,color .2s}
+.search-clear:hover{background:#19231b;color:var(--lime)}
+.search-clear:focus-visible{outline:2px solid #7da32c;outline-offset:1px}
+/* On list pages the search sits on its own above the rows, on white like the cards. */
+.list-search{max-width:440px;margin:0 0 18px}
+.list-search .search-box input,.filter-bar .search-box input,.filter-bar .select-trigger{background:#fff}
+
+/* Search and dropdown side by side above a list. */
+.filter-bar{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px;align-items:end;margin-bottom:22px}
+
+/* ---------- Calendar (components/DatePicker.tsx) ---------- */
+.field-stack{display:grid;gap:8px}
+.date-field{display:grid;gap:9px;min-width:0;position:relative}
+.date-field.is-open{z-index:50}
+:is(.stack-form,.form-two,.filter-bar)>:has(.date-field.is-open){position:relative;z-index:50}
+.date-field.is-open .select-trigger{border-color:#7da32c;box-shadow:0 0 0 3px #d7fb604d;background:#fff}
+.date-field.is-open .select-chevron{transform:rotate(-90deg)}
+.date-trigger{justify-content:flex-start}
+.date-trigger .select-value{flex:1}
+.date-icon{flex:none;color:#5d8122}
+.date-menu{position:absolute;left:0;top:calc(100% + 6px);z-index:40;width:300px;max-width:calc(100vw - 32px);background:#19231b;color:#fff;border:1px solid #ffffff14;border-radius:10px;box-shadow:0 22px 50px #0f1a1040;padding:14px;animation:select-in .18s var(--ease) both}
+.date-menu.is-upward{top:auto;bottom:calc(100% + 6px)}
+.date-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.date-head strong{font:800 15px Manrope,sans-serif;letter-spacing:-.02em}
+.date-nav{width:32px;height:32px;border:1px solid #ffffff1c;border-radius:50%;background:transparent;color:#e4ebe0;display:grid;place-items:center;cursor:pointer;transition:background .2s,color .2s,border-color .2s}
+.date-nav:hover:not(:disabled){background:var(--lime);border-color:var(--lime);color:var(--ink)}
+.date-nav:disabled{opacity:.3;cursor:not-allowed}
+.date-prev{transform:rotate(180deg)}
+.date-weekdays,.date-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.date-weekdays span{text-align:center;font-size:10px;font-weight:800;letter-spacing:.08em;color:#8f9e89;padding:4px 0 8px;text-transform:uppercase}
+.date-day{aspect-ratio:1;border:0;border-radius:7px;background:transparent;color:#e4ebe0;font-size:13px;font-weight:700;cursor:pointer;position:relative;transition:background .15s,color .15s}
+.date-day:hover:not(:disabled){background:#d7fb601f;color:var(--lime)}
+.date-day:focus-visible{outline:2px solid var(--lime);outline-offset:-2px}
+.date-day.is-outside{color:#6f7d6a}
+.date-day.is-today::after{content:'';position:absolute;left:50%;bottom:5px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--lime)}
+.date-day.is-selected{background:var(--lime);color:var(--ink);font-weight:800}
+.date-day.is-selected::after{background:var(--ink)}
+.date-day.is-selected:hover{background:#c9f04a;color:var(--ink)}
+.date-day:disabled{color:#4f5b4c;cursor:not-allowed;text-decoration:line-through;text-decoration-color:#ffffff22}
+.date-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid #ffffff14;font-size:11px;font-weight:600;color:#9fae99;min-height:20px}
+.date-clear{border:0;background:transparent;color:var(--lime);font-size:11px;font-weight:800;cursor:pointer;padding:0}
+.date-clear:hover{text-decoration:underline}
+
+/* ---------- Home quick-book: the dropdown and calendar drawn flat inside the bar ---------- */
+.quick-book-field{min-width:0;position:relative}
+.quick-book-field:has(.is-open){z-index:50}
+.quick-book-control .select-trigger{border:0;background:transparent;padding:4px 0;box-shadow:none;font-weight:700;border-radius:0}
+.quick-book-control .select-trigger:hover,.quick-book-control.is-open .select-trigger,.quick-book-control .select-trigger:focus-visible{background:transparent;box-shadow:none}
+.quick-book-control .select-trigger:focus-visible .select-value{text-decoration:underline;text-decoration-color:#9cc23a;text-underline-offset:4px}
+.quick-book-control .select-menu{left:-20px;right:-20px;min-width:240px}
+.quick-book-control .date-menu{left:-20px}
 
 /* ---------- Confirm modal (components/ConfirmModal.tsx) ---------- */
 .modal-backdrop{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:20px;background:#0c120dcc;backdrop-filter:blur(6px);animation:modal-fade .2s ease both}
@@ -51,6 +122,19 @@
 .button-danger{background:#c2493d;border-color:#c2493d;color:#fff}
 .button-danger:hover{background:#a83d32;border-color:#a83d32;box-shadow:0 12px 30px #c2493d40}
 .button-danger:disabled,.button-secondary:disabled{opacity:.6;cursor:wait;transform:none}
+/* Ordinary confirmations (confirm a request, assign staff, complete a job) use lime instead of red. */
+.confirm-modal.is-primary .modal-icon{background:#eaf3d8;color:#4e6a1b;box-shadow:0 0 0 8px #eaf3d870}
+.button-confirm{background:#19231b;border-color:#19231b;color:var(--lime)}
+.button-confirm:hover{background:#26342a;border-color:#26342a;box-shadow:0 12px 30px #19231b33}
+.button-confirm:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.modal-actions .button{text-align:center}
+/* A field inside the modal, such as a new date or an internal note. */
+.modal-body{display:grid;gap:9px;margin-top:20px;text-align:left}
+.modal-field{display:grid;gap:9px}
+.modal-field input,.modal-field textarea{width:100%;border:1px solid #dce3d8;background:#f7f9f4;border-radius:5px;padding:13px 15px;color:var(--ink);font-size:14px;font-weight:500;outline:none;resize:vertical;transition:border-color .2s,box-shadow .2s,background .2s}
+.modal-field input:focus,.modal-field textarea:focus{border-color:#7da32c;box-shadow:0 0 0 3px #d7fb604d;background:#fff}
+.modal-body .date-menu{left:50%;transform:translateX(-50%)}
+.modal-body .date-menu{animation:none}
 @keyframes modal-fade{from{opacity:0}to{opacity:1}}
 @keyframes modal-pop{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
 
@@ -63,13 +147,6 @@
 .password-toggle[aria-pressed="true"]{color:#5d8122}
 
 /* ---------- Service form: adding a location inline ---------- */
-.location-options .check-row span{display:grid;gap:2px}
-.location-options .check-row small{font-size:11px}
-.location-picker-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.location-picker-foot .small-button{display:inline-flex;align-items:center;gap:6px}
-.location-picker-foot .inline-link{font-size:12px}
-.new-location{display:grid;gap:14px;border:1px dashed #b9cba6;background:#fff;border-radius:6px;padding:16px}
-.new-location-actions{display:flex;justify-content:flex-end;gap:8px}
 .field-error{font-size:12px;font-weight:700;color:#9b3d34}
 .location-edit .select-compact{width:180px}
 
@@ -118,11 +195,18 @@
   .admin-row .select-compact{margin-left:0;flex-basis:100%}
   .confirm-modal{padding:28px 20px 22px}
   .modal-actions{grid-template-columns:1fr}
-  .modal-actions .button-danger{order:-1}
+  .modal-actions .button-danger,.modal-actions .button-confirm{order:-1}
+  .modal-field input,.modal-field textarea{font-size:16px}
   .reviews-section .section-header-row .review-stars{align-items:flex-start;text-align:left}
   .review-carousel .review-card blockquote{font-size:17px}
   .my-reviews{grid-template-columns:1fr}
   .select-menu .select-search input{font-size:16px}
+  .search-box input{font-size:16px}
+  .filter-bar{grid-template-columns:1fr}
+  .list-search{max-width:none}
+  .assign-select{width:100%}
+  .quick-book-control .select-menu{left:-10px;right:-10px}
+  .quick-book-control .date-menu{left:-10px}
 }
 
 /* ---------- Services and booking inside the customer dashboard ---------- */
@@ -133,3 +217,54 @@
 .dashboard-main .page-hero-spark{display:none}
 .dashboard-main .booking-layout{padding:0 0 40px;gap:6%}
 .dashboard-main .catalog-grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+/* Tables in the dashboard: a white card with small uppercase headings, like the stat tiles. Rows become cards on phones. */
+.data-table-card{background:#fff;border:1px solid #dce4d6;border-radius:7px;overflow:hidden}
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{text-align:left;padding:14px 18px;background:#f7f9f4;border-bottom:1px solid #e3e9de;font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#74856e;white-space:nowrap}
+.data-table td{padding:15px 18px;border-bottom:1px solid #edf1e9;vertical-align:middle;color:#3f4a40;overflow-wrap:anywhere}
+.data-table tbody tr:last-child td{border-bottom:0}
+.data-table tbody tr{transition:background .15s}
+.data-table tbody tr:hover{background:#f9fbf5}
+.data-table time{display:grid;gap:2px;font-weight:700;color:var(--ink);white-space:nowrap}
+.data-table time small{font-size:11px;font-weight:600;color:var(--muted)}
+.data-table-strong{font-weight:700;color:var(--ink)}
+.data-table-id{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:11px;color:var(--muted)}
+.action-pill{display:inline-block;padding:5px 10px;border-radius:100px;font-size:11px;font-weight:800;white-space:nowrap}
+.action-pill::first-letter{text-transform:uppercase}
+.action-add{background:#eafbb8;color:#3f5c0e}
+.action-change{background:#eef2ea;color:#4e5c4a}
+.action-remove{background:#fde8e4;color:#9b3324}
+.pagination.data-table-foot{margin:0;padding:12px 18px;border-top:1px solid #e3e9de;background:#fbfcf8}
+@media(max-width:760px){
+  .data-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .data-table,.data-table tbody,.data-table tr,.data-table td{display:block}
+  .data-table tbody tr{padding:12px 16px;border-bottom:1px solid #edf1e9}
+  .data-table tbody tr:last-child{border-bottom:0}
+  .data-table td{display:grid;grid-template-columns:76px 1fr;gap:10px;align-items:start;padding:6px 0;border:0}
+  .data-table td::before{content:attr(data-label);font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#74856e;padding-top:3px}
+  .data-table td .action-pill{justify-self:start}
+  .pagination.data-table-foot{padding:12px 16px}
+}
+/* Page switcher under admin lists: round page buttons, the current one in lime like the main buttons. */
+.pagination{display:flex;align-items:center;justify-content:space-between;gap:12px 18px;flex-wrap:wrap;margin:18px 0 0;font-size:12px;font-weight:600;color:var(--muted)}
+.pagination-count strong{color:var(--ink);font-weight:800}
+.pagination-pages{display:flex;align-items:center;gap:6px}
+.pagination-page,.pagination-step{min-width:36px;height:36px;padding:0 10px;border:1px solid #cfdac6;border-radius:100px;background:#fff;color:var(--ink);font-size:12px;font-weight:800;display:grid;place-items:center;cursor:pointer;transition:background .2s,border-color .2s,color .2s,transform .2s var(--ease)}
+.pagination-page:hover,.pagination-step:hover:not(:disabled){background:#f1f6e8;border-color:#b9c9ad}
+.pagination-page:focus-visible,.pagination-step:focus-visible{outline:none;border-color:#7da32c;box-shadow:0 0 0 3px #d7fb604d}
+.pagination-page.is-current{background:var(--lime);border-color:var(--lime);cursor:default}
+.pagination-page.is-current:hover{background:var(--lime);border-color:var(--lime)}
+.pagination-step{padding:0;color:#5d8122}
+.pagination-step:disabled{opacity:.4;cursor:not-allowed}
+.pagination-back{transform:rotate(180deg)}
+.pagination-gap{min-width:20px;text-align:center;color:#8a9686;font-weight:800}
+.small-button:disabled{opacity:.5;cursor:not-allowed}
+.small-button-danger{color:#9b3324;border-color:#efc9c2}
+.small-button-danger:hover:not(:disabled){background:#fde8e4;border-color:#e3aea4}
+@media(max-width:760px){
+  .pagination{justify-content:center;text-align:center}
+}
+/* A field that failed its check, with the message under it. */
+.stack-form input[aria-invalid="true"]{border-color:#d9897d;background:#fffaf8}
+.stack-form input[aria-invalid="true"]:focus{border-color:#c4685a;box-shadow:0 0 0 3px #f3c9c24d}
+.stack-form label>.field-error{margin-top:-2px}
