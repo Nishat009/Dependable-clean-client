@@ -13,6 +13,7 @@ import { useRemote } from '../hooks/useRemote';
 import type { Booking, Review, ReviewStatus } from '../types';
 
 const statusNote: Record<ReviewStatus, string> = {
+  Hidden: 'Hidden from the site',
   Pending: 'Waiting for our team to approve it',
   Approved: 'Showing on the home page',
   Rejected: 'Not shown on the site',
@@ -38,8 +39,8 @@ function StarPicker({ value, onChange }: { value: number; onChange(value: number
 // Customers review one of their own orders. The review waits as Pending until the super admin approves it.
 export default function ReviewPage() {
   const { user } = useAuth();
-  const { data: mine, refresh } = useRemote<Review[]>(user ? '/myReviews' : null, []);
-  const { data: orders, loading, refresh: refreshOrders } = useRemote<Booking[]>(user ? '/reviewOrders' : null, []);
+  const { data: mine, error: mineError, refresh } = useRemote<Review[]>(user ? '/myReviews' : null, []);
+  const { data: orders, loading, error: ordersError, refresh: refreshOrders } = useRemote<Booking[]>(user ? '/reviewOrders' : null, []);
   const [orderId, setOrderId] = useState('');
   const [rating, setRating] = useState(5);
   const [comments, setComments] = useState('');
@@ -74,7 +75,7 @@ export default function ReviewPage() {
       : <div className="form-card dashboard-form review-form-card">
         <span className="eyebrow"><span className="eyebrow-dot" /> SHARE YOUR EXPERIENCE</span>
         <h2>A note from you.</h2>
-        <Notice message={error} type="error" onClose={() => setError('')} />
+        <Notice message={error || mineError || ordersError} type="error" onClose={() => setError('')} />
         {!loading && !open.length
           ? <p className="review-all-done"><Icon name="check" size={18} /> You have reviewed all {orders.length} of your orders. Thank you!</p>
           : <form onSubmit={submit} className="stack-form">
