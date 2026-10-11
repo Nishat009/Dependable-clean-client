@@ -128,7 +128,7 @@ async function start() {
     const password = String(req.body.password || '');
     if (!name) return fail(res, 400, 'Please enter your name.');
     if (!v.isEmail(email)) return fail(res, 400, 'Please enter a valid email address.');
-    if (password.length < 12 || password.length > 200) return fail(res, 400, 'Your password needs 12�200 characters.');
+    if (password.length < 12 || password.length > 200) return fail(res, 400, 'Your password needs 12–200 characters.');
     if (await users.findOne({ email })) return fail(res, 409, accountExists);
     const user = await createUser({ name, email, password });
     if (!user) return fail(res, 409, accountExists);
@@ -423,7 +423,7 @@ async function start() {
     const user = await users.findOne({ setupHash });
     const password = String(req.body.password || '');
     if (!user || user.setupExpires < Date.now() || user.active === false) return fail(res, 400, 'Setup link expired or invalid.');
-    if (password.length < 12 || password.length > 200) return fail(res, 400, 'Use a password of 12�200 characters.');
+    if (password.length < 12 || password.length > 200) return fail(res, 400, 'Use a password of 12–200 characters.');
     const result = await users.updateOne({ _id: user._id, setupHash }, { $set: { password: hashPassword(password), invited: false, setupHash: null, setupExpires: 0 } });
     if (!result.matchedCount) return fail(res, 409, 'Link already used.');
     res.json(true);
