@@ -16,18 +16,27 @@ function createDemoDb() {
   };
   return { collection(name) {
     const rows = data[name] || (data[name] = []);
+    const indexes = [];
+    const checkUnique = (value) => {
+      for (const index of indexes) {
+        const keys = Object.keys(index.keys);
+        if (index.options.partialFilterExpression && typeof value[keys[0]] !== 'string') continue;
+        if (rows.some(row => keys.every(key => String(row[key]) === String(value[key])))) { const error = new Error('Duplicate key'); error.code = 11000; throw error; }
+      }
+    };
     const matches = (row, filter = {}) => Object.entries(filter).every(([key, value]) => String(row[key]) === String(value));
     return {
       find(filter = {}) { return { toArray: async () => rows.filter((row) => matches(row, filter)) }; },
       async findOne(filter) { return rows.find((row) => matches(row, filter)) || null; },
-      async insertOne(value) { const row = withId(value); rows.push(row); value._id = row._id; return { insertedId: row._id }; },
+      async insertOne(value) { checkUnique(value); const row = withId(value); rows.push(row); value._id = row._id; return { insertedId: row._id }; },
       async updateOne(filter, update) {
         const row = rows.find((item) => matches(item, filter));
         if (!row) return { matchedCount: 0, modifiedCount: 0 };
-        Object.assign(row, update.$set);
+        Object.assign(row, update.$set || {});
+        for (const [key,value] of Object.entries(update.$addToSet || {})) row[key] = [...new Set([...(row[key] || []), value])];
         return { matchedCount: 1, modifiedCount: 1 };
       },
-      async createIndex() {},
+      async createIndex(keys, options = {}) { if (options.unique) indexes.push({ keys, options }); },
       async deleteOne(filter) {
         const index = rows.findIndex((row) => matches(row, filter));
         if (index < 0) return { deletedCount: 0 };
