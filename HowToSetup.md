@@ -70,7 +70,7 @@ and change `NEXT_PUBLIC_API_URL`.
 npm run db:setup
 ```
 
-To create only the schema without demo data, run `npm run db:schema`. The complete MongoDB schema is in `database/migrations/001-initial-schema.js`; see `database/README.md` for collection and index details.
+To create only the schema without demo data, run `npm run db:schema`. The complete MongoDB schema is in `database/migrations/001-initial-schema.js`; see `database/README.md` for collection and index details. `database/schema.sql` and `database/seed.sql` hold the same schema and demo data as SQL for reference; `backend/seed.js` is the seed the app uses.
 
 This runs two scripts in `backend/`:
 
