@@ -14,6 +14,7 @@
     "build": "npm run build --workspace @dependable-clean/client",
     "start": "concurrently -k -n frontend,backend -c cyan,green \"npm --workspace @dependable-clean/client run start\" \"npm --workspace @dependable-clean/server run start\"",
     "test": "node --test backend/management.test.js scripts/ui.test.cjs",
+    "db:schema": "npm --workspace @dependable-clean/server run db:schema",
     "db:setup": "npm --workspace @dependable-clean/server run db:setup",
     "package": "git archive --format=zip -o dependable-clean.zip HEAD"
   },
