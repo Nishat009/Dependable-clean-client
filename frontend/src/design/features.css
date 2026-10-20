@@ -110,3 +110,4 @@
   .support-chat{right:16px;bottom:16px}
   .support-chat-toggle{width:54px;height:54px}
 }
+.demo-login-details{display:grid;gap:5px;min-width:0}.demo-login-details strong{font-size:13px}.demo-login-details small{font-size:11px;font-weight:600;color:#64715f;overflow-wrap:anywhere}.demo-login-action{display:flex;align-items:center;gap:7px;flex:none;margin-left:12px;font-size:11px;color:#4e6a1b}

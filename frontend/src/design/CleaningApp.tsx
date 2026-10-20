@@ -79,8 +79,7 @@ function findRoute(path: string): Route {
 
 function Routes({ initialPath }: { initialPath: string }) {
   const router = useRouter();
-  const [businessReady, setBusinessReady] = useState(false);
-  const [servicesLoading,setServicesLoading] = useState(true);
+  const [, setBusinessReady] = useState(false);
   const [serviceError,setServiceError] = useState('');
   useEffect(() => { api<{ timezone: string; currency: string }>('/business').then(configureBusiness).finally(() => setBusinessReady(true)).catch(() => {}); }, []);
   const dispatch = useAppDispatch();
@@ -90,12 +89,11 @@ function Routes({ initialPath }: { initialPath: string }) {
   const needsUser = route.access !== 'public';
   useRevealObserver(path);
 
-  // Refetch only when the role changes which list is shown. servicesLoading only covers the first load, so a refetch
-  // never swaps the page for the loading screen and wipes what the visitor was typing.
+  // Render built-in services immediately, then replace them with live data when the API answers.
   const seesAllServices = isManager(user?.role);
   useEffect(() => {
     let active = true;
-    api<Service[]>(seesAllServices ? '/serviceList' : '/services').then((data) => { if (!active) return; if (Array.isArray(data)) dispatch(setServices(data)); setServiceError(''); }).catch(() => { if (active) setServiceError('Services are unavailable. Please refresh and try again.'); }).finally(() => setServicesLoading(false));
+    api<Service[]>(seesAllServices ? '/serviceList' : '/services').then((data) => { if (!active) return; if (Array.isArray(data)) dispatch(setServices(data)); setServiceError(''); }).catch(() => { if (active) setServiceError('Services are unavailable. Please refresh and try again.'); });
     return () => { active = false; };
   }, [dispatch, seesAllServices]);
   useEffect(() => {
@@ -103,8 +101,7 @@ function Routes({ initialPath }: { initialPath: string }) {
   }, [needsUser, ready, user, path, router]);
 
   let content: ReactNode;
-  if (!businessReady || servicesLoading) content = <main className="public-page wrap" aria-busy="true"><p>Loading Dependable Clean…</p></main>;
-  else if (!needsUser) content = route.render();
+  if (!needsUser) content = route.render();
   // The server cannot see the browser's session, so it renders this light placeholder in the dashboard's own colors
   // instead of a dark screen that would flash before the dashboard appears.
   else if (!ready || !user) content = <div className="dashboard-page dashboard-loading" aria-busy="true"><span className="loading-spark">✳</span> {ready ? 'Taking you to sign in…' : 'Preparing your space…'}</div>;

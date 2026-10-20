@@ -120,9 +120,9 @@ export default function HeroSlider({ children }: { children?: ReactNode }) {
           if (Math.abs(delta) > 45) go(index + (delta < 0 ? 1 : -1), delta < 0 ? 1 : -1);
         }}>
         <span className="hs-floor" aria-hidden="true" />
-        {/* Every slide loads up front, so a photo never pops in halfway through its entrance. */}
-        {heroSlides.map((item, i) => <div key={item.product} className={'hs-slide' + (i === index ? ' is-active' : i === previous ? ' is-leaving' : '')} aria-hidden={i !== index}>
-          <img className="hs-product" src={heroImages[item.product].src} alt={i === index ? item.name + ' cleaning kit' : ''} width={heroImages[item.product].width} height={heroImages[item.product].height} loading="eager" decoding="async" />
+        {/* Keep the active and outgoing product mounted; fetch other products only when selected. */}
+        {heroSlides.map((item, i) => (i === index || i === previous) && <div key={item.product} className={'hs-slide' + (i === index ? ' is-active' : ' is-leaving')} aria-hidden={i !== index}>
+          <img className="hs-product" src={heroImages[item.product].src} alt={i === index ? item.name + ' cleaning kit' : ''} width={heroImages[item.product].width} height={heroImages[item.product].height} loading={i === index ? 'eager' : 'lazy'} decoding="async" />
         </div>)}
         <div className="hs-caption" key={'c' + index}>
           <span className="hs-caption-dot" />

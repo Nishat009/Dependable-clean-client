@@ -1,6 +1,6 @@
 import type { Location, ProductType, Service } from './types';
 
-// Loaded from the API before screens mount; one business calendar and currency.
+// Live business settings update these defaults after the first render.
 export const businessConfig = { timezone: 'Asia/Dhaka', currency: 'BDT' };
 export function configureBusiness(config: { timezone: string; currency: string }) { Object.assign(businessConfig, { timezone: config.timezone, currency: config.currency }); }
 

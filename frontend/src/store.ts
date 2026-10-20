@@ -1,5 +1,6 @@
 import { configureStore, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { useDispatch, useSelector } from 'react-redux';
+import { demoServices } from './design/data';
 import type { Service } from './design/types';
 
 interface ServicesState {
@@ -20,7 +21,7 @@ const servicesSlice = createSlice({
 });
 
 export const { setServices } = servicesSlice.actions;
-export const store = configureStore({ reducer: { services: servicesSlice.reducer } });
+export const store = configureStore({ reducer: { services: servicesSlice.reducer }, preloadedState: { services: { items: demoServices, loaded: false } } });
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
