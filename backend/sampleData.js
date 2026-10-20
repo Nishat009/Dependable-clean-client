@@ -42,7 +42,7 @@ function sampleData() {
       { name: 'Jordan L.', rating: 5, comments: 'The little details made the biggest difference.', status: 'Approved' }
     ],
     admin: [{ email: 'admin@dependableclean.demo', role: 'superAdmin' }],
-    // Only the local preview uses these. Admins add real locations from the dashboard.
+    // The local preview and npm run seed use these. Admins add real locations from the dashboard.
     location: [{ name: 'Gulshan 1', city: 'Dhaka', thana: 'Gulshan', address: 'Gulshan Avenue' }, { name: 'Dhanmondi Lake', city: 'Dhaka', thana: 'Dhanmondi', address: 'Road 27' }, { name: 'Uttara Sector 7', city: 'Dhaka', thana: 'Uttara West', address: 'Sector 7' }]
   };
 }

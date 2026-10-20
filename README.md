@@ -1,57 +1,78 @@
-﻿# Dependable Clean
+# Dependable Clean
 
-A single-business cleaning management app using the existing Next.js/React frontend and Express/MongoDB API.
+**Live website:** [dependable-clean-client.vercel.app](https://dependable-clean-client.vercel.app/)
 
-## Run locally
+Dependable Clean is a website for a cleaning business. Customers book a cleaning, the owner manages the business, and staff go out and do the jobs. Everyone signs in and lands on the same dashboard, but each person only sees what their role allows.
 
-Run `npm install`, then `npm run dev` from the repository root. Frontend: http://localhost:3000. API: http://localhost:5000.
+## Who does what
 
-Without MongoDB, development uses an **in-memory preview**. It resets on restart; use test data only. Demo Staff, Customer and Admin buttons are available in local development, with either preview storage or MongoDB. Set `DEMO_ACCOUNTS=off` to disable them. Production mode never enables demo sign-in, and previously created demo users are blocked there. Use a development database when testing demo accounts; demo actions affect the configured development data.
+### Owner (super admin)
+The person who runs the business. They can do everything:
+- Set up services, prices and the areas the business covers.
+- Write the public contact details, FAQ, cancellation policy and offers.
+- Add staff and sub admins, change their names, and switch their access off or back on.
+- See every booking, confirm it, and send a staff member to do the job.
+- Approve or turn down reschedule and cancellation requests.
+- Approve, reject or hide customer reviews.
+- Chat privately with customers and hand support tickets to staff.
+- See reports and a log of what has changed.
 
-For persistent data, copy `backend/.env.example` to `backend/.env` and set `MONGODB_URI`, `DB_NAME`, `CLIENT_ORIGIN` and a strong `AUTH_SECRET`. Production requires MongoDB. Set `NEXT_PUBLIC_API_URL` in the frontend environment to the API origin, then rebuild. Keep frontend and API on HTTPS in production.
+### Sub admin
+A manager who helps the owner. They can do everything the owner can, **except** add or change team members.
 
-## Owner setup and business configuration
+### Staff
+The cleaners who do the work. They can:
+- See the jobs given to them and their schedule.
+- Mark a job as started, then as finished.
+- Leave internal notes on a job (customers never see these).
+- Answer the support tickets handed to them.
+- Update their own profile.
 
-Set `OWNER_EMAIL` and `OWNER_NAME` in the backend environment, then run `npm run setup-owner --workspace @dependable-clean/server`. This prints a private, single-use setup link, valid for 24 hours. Open it to choose your password. The command refuses to reset an existing configured account or replace an existing real owner. It can retire the old seeded demo owner without deleting its records. Existing real owners can continue using their existing credentials.
+Staff can't see other people's jobs, reports, reviews or team settings. If the owner switches a staff member off, they lose access straight away.
 
-`BUSINESS_TIMEZONE` (default `Asia/Dhaka`) and `BUSINESS_CURRENCY` (default `BDT`) are configured on the **API**; the frontend loads both from `/business`. Confirm the currency of existing service prices before launch; changing the setting does not convert stored amounts. Prices are snapshots in the configured business currency; do not change currency after live bookings without a deliberate data migration.
+### Customer
+The people who book cleanings. They can:
+- Request a cleaning (at least 3 days ahead, in an area the business covers).
+- See their bookings and past history.
+- Ask to reschedule or cancel a booking.
+- Leave one review after a job is finished (it shows publicly once the owner approves it).
+- Chat privately with the business for support.
+- Update their own profile.
 
-From the owner's dashboard:
+## How a booking moves
 
-- Add supported service areas before accepting requests, and configure services, prices, scope and active status.
-- Add actual contact details, FAQ, cancellation policy and current offer terms under **Business content**. These appear publicly in the footer. Empty content stays unpublished; no contact details or discounts are invented. Offer terms are informational; each service's configured price is the booking price.
-- Add staff and sub admins under **Team** with their name, email and a password of 12–200 characters, then share the password with them privately. They can sign in straight away. An email that already belongs to an account cannot be added, so a customer's password is never overwritten. The owner can rename team members and deactivate or reactivate them from the same page.
-- Review booking requests, confirm them, then assign active staff. Approve a requested reschedule or cancel a booking as appropriate. Mark a request handled to dismiss a rejected request; use support to explain the decision.
+1. **Requested** – the customer asks for a cleaning.
+2. **Confirmed** – the owner accepts it.
+3. **Assigned** – the owner picks a staff member.
+4. **In progress** – the staff member starts the job.
+5. **Completed** – the job is done and the customer can leave a review.
 
-`BUSINESS_EMAIL` and `BUSINESS_PHONE` provide initial contact defaults, until the owner saves Business content. Do not run the demo seed against a live business database: it contains sample services and reviews. Existing records are preserved; old booking status labels are normalized when read. Old bookings retain their stored name and price; scope cannot be reconstructed reliably for bookings created before snapshots existed.
+A booking can be cancelled any time before the work starts.
 
-## Roles and workflows
+## Run it on your computer
 
-All roles share the dashboard shell and land on `/dashboard` after login. Legacy screen URLs remain available for existing links.
+```bash
+npm install
+npm run dev
+```
 
-- `super_admin`: services/pricing, published offer terms, service areas, team access, all bookings and assignments, review moderation, private customer support and ticket assignment, reports and activity.
-- `sub_admin`: everything the owner does except adding or changing team members.
-- `staff`: active service/area information, their assigned jobs and schedule, permitted job status updates and internal notes, the support tickets assigned to them, own profile.
-- `customer`: cleaning requests, own booking details/history, cancellation/reschedule requests, one review per completed booking, private owner support and own profile.
+- Website: http://localhost:3000
+- API: http://localhost:5000
 
-Backend checks use the current database account and role on every protected request. Role and ownership cannot be chosen by sending a customer ID or a role in a request. Deactivated staff immediately lose API access, including existing tokens; their staff record and assigned-job history stay intact. Staff see only the support tickets assigned to them, and cannot access moderation, reports, team administration, or unassigned jobs.
+Without a database, the app runs with temporary test data that is wiped on restart. Demo **Admin**, **Staff** and **Customer** sign-in buttons appear in local development so you can try each role (set `DEMO_ACCOUNTS=off` to hide them).
 
-Bookings follow `requested → confirmed → assigned → in_progress → completed`, with cancellation before work begins. Staff may move only their assigned jobs from `assigned` to `in_progress`, then `completed`. Requests require a real date at least three business-calendar days ahead, a supported area with a matching thana, and an address. Service name, price and scope are copied into the booking. A request is not confirmed until the owner confirms it. Internal notes are omitted from customer API responses.
+To keep data, copy `backend/.env.example` to `backend/.env` and fill in `MONGODB_URI`, `DB_NAME`, `CLIENT_ORIGIN` and a strong `AUTH_SECRET`.
 
-Support messages persist in MongoDB. Polling runs every 10 seconds, with unread counts, per-message read state, timestamps and open/resolved status. Sending is limited to 10 messages per account per minute in this single-server deployment. No additional infrastructure is required.
+## First-time owner setup
 
-Reviews start pending and require the submitting customer's completed booking. A unique booking-review index prevents duplicate reviews. Only approved reviews are public. The owner can approve, reject or hide them. Legacy reviews without a status retain their previous published behavior.
+1. Put `OWNER_EMAIL` and `OWNER_NAME` in the backend `.env`.
+2. Run `npm run setup-owner --workspace @dependable-clean/server`.
+3. Open the link it prints (valid for 24 hours) and choose a password.
+4. From the dashboard, add service areas, services and prices, your business contact info, and your team.
 
-Reports distinguish **booking value** from **recorded payments**. This app does not implement payment collection; booking value is never labeled revenue. Activity records track staff access changes, booking updates/assignments, service/area changes, business content and review moderation.
+The business timezone and currency default to `Asia/Dhaka` and `BDT` (change with `BUSINESS_TIMEZONE` and `BUSINESS_CURRENCY`). Don't change the currency after real bookings exist, because old prices are not converted.
 
-Management lists provide search/filter controls and client-side pagination, appropriate to a small business.
+## Checks
 
-## Verification
-
-- `npm test`: API integration and rendered-component tests.
-- `npm run build`: frontend production build and TypeScript checking.
-- `npm run build --workspace @dependable-clean/server`: backend syntax checks.
-
-API tests launch an isolated preview server and exercise direct HTTP requests: all roles' management restrictions, ownership, invalid booking input, status transitions, assignments, rescheduling, internal-note privacy, review eligibility/moderation, support privacy/read counts/rate limits, profile privilege escalation attempts, owner-set team passwords and deactivated staff tokens. Component tests verify role navigation, exact sidebar selection and `/dashboard` login redirects. These tests do not connect to your production database or send emails or messages to real people.
-
-Before launch, configure MongoDB, owner access, business timezone/currency, API/frontend origins, real contact/policy content, services and areas. The automated checks use the Mongo-compatible preview adapter; verify database connectivity and indexes in your deployment. If historic duplicate reviews exist for the same booking, preserve them for manual reconciliation before creating the unique review index. Native browser interaction and live MongoDB testing require a local browser/database environment.
+- `npm test` – runs the automated tests (they never touch real data or contact real people).
+- `npm run build` – builds the website and checks for type errors.

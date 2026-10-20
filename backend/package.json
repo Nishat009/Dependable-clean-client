@@ -7,8 +7,10 @@
     "dev": "node --watch index.js",
     "start-dev": "node --watch index.js",
     "start": "node index.js",
-    "build": "node --check index.js && node --check auth.js && node --check demoDb.js && node --check validation.js && node --check sampleData.js && node --check seed.js && node --check permissions.js && node --check management.js && node --check setup-owner.js",
+    "build": "node --check index.js && node --check auth.js && node --check demoDb.js && node --check validation.js && node --check sampleData.js && node --check seed.js && node --check permissions.js && node --check management.js && node --check setup-owner.js && node --check schema.js",
+    "db:schema": "node schema.js",
     "seed": "node seed.js",
+    "db:setup": "node schema.js && node seed.js",
     "test": "node --test management.test.js",
     "setup-owner": "node setup-owner.js"
   },

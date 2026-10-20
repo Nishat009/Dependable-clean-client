@@ -4,3 +4,4 @@ frontend/.next/
 frontend/out/
 backend/.env
 *.log
+dependable-clean.zip

@@ -6,7 +6,7 @@ if (process.env.DNS_SERVERS) require('node:dns').setServers(process.env.DNS_SERV
 
 const detailFields = ['includes', 'teamSize', 'idealFor', 'suppliesIncluded'];
 
-// Adds the sample services, reviews and admin to MongoDB. Running it again does not create duplicates.
+// Adds the sample services, reviews, admin and service areas to MongoDB. Running it again does not create duplicates.
 // Sample services that were added before services had details get the missing detail fields.
 async function seed() {
   if (!process.env.MONGODB_URI) throw new Error('Set MONGODB_URI in backend/.env before seeding.');
@@ -19,7 +19,8 @@ async function seed() {
     const results = {
       service: await upsert('service', sample.service, '_id'),
       review: await upsert('review', sample.review, 'comments'),
-      admin: await upsert('admin', sample.admin, 'email')
+      admin: await upsert('admin', sample.admin, 'email'),
+      location: await upsert('location', sample.location, 'name')
     };
     for (const [name, rows] of Object.entries(results)) {
       console.log(`${name}: ${rows.filter((row) => row.upsertedCount).length} added, ${rows.filter((row) => !row.upsertedCount).length} already there`);

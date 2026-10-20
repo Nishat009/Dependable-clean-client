@@ -13,7 +13,9 @@
     "dev": "concurrently -k -n frontend,backend -c cyan,green \"npm --workspace @dependable-clean/client run dev\" \"npm --workspace @dependable-clean/server run dev\"",
     "build": "npm run build --workspace @dependable-clean/client",
     "start": "concurrently -k -n frontend,backend -c cyan,green \"npm --workspace @dependable-clean/client run start\" \"npm --workspace @dependable-clean/server run start\"",
-    "test": "node --test backend/management.test.js scripts/ui.test.cjs"
+    "test": "node --test backend/management.test.js scripts/ui.test.cjs",
+    "db:setup": "npm --workspace @dependable-clean/server run db:setup",
+    "package": "git archive --format=zip -o dependable-clean.zip HEAD"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"

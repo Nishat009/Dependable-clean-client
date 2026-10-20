@@ -18,5 +18,7 @@ services:
         sync: false
       - key: CLIENT_ORIGIN
         sync: false
+      - key: DEMO_ACCOUNTS
+        value: "on"
       - key: AUTH_SECRET
         generateValue: true

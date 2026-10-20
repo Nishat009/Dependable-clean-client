@@ -15,9 +15,7 @@ if (process.env.DNS_SERVERS) require('node:dns').setServers(process.env.DNS_SERV
 const app = express();
 const port = Number(process.env.PORT) || 5000;
 const databaseName = process.env.DB_NAME || 'houseCleaning';
-const mongoUri = process.env.MONGODB_URI || (process.env.DB_USER && process.env.DB_PASS
-  ? `mongodb+srv://${encodeURIComponent(process.env.DB_USER)}:${encodeURIComponent(process.env.DB_PASS)}@cluster0.ktoki.mongodb.net/${databaseName}?retryWrites=true&w=majority`
-  : null);
+const mongoUri = process.env.MONGODB_URI || null;
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false }));
@@ -47,7 +45,7 @@ function explainConnectionError(error) {
 }
 
 async function start() {
-  if (!mongoUri && !demoMode) throw new Error('Set MONGODB_URI or DB_USER and DB_PASS in backend/.env before starting the API.');
+  if (!mongoUri && !demoMode) throw new Error('Set MONGODB_URI in backend/.env before starting the API.');
   let db;
   if (demoMode) db = createDemoDb();
   else {
@@ -107,9 +105,9 @@ async function start() {
     }
   }
 
-  // DEMO_ACCOUNTS=off removes the demo sign-in for a real launch.
+  // DEMO_ACCOUNTS=off removes the demo sign-in for a real launch, and DEMO_ACCOUNTS=on keeps it in production for a public demo.
   // Local development supports demo accounts with MongoDB as well as preview storage.
-  const demoEnabled = process.env.NODE_ENV !== 'production' && process.env.DEMO_ACCOUNTS !== 'off';
+  const demoEnabled = process.env.DEMO_ACCOUNTS === 'on' || (process.env.NODE_ENV !== 'production' && process.env.DEMO_ACCOUNTS !== 'off');
   app.get('/authOptions', (_req,res) => res.json({ demoEnabled }));
   if (demoEnabled) {
     for (const account of Object.values(demoAccounts)) {
