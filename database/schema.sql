@@ -1,0 +1,13 @@
+-- Dependable Clean does not use a SQL database.
+--
+-- The data store is MongoDB. This file exists only to point to the real schema:
+--
+--   database/migrations/001-initial-schema.js   creates all 10 collections and their indexes
+--   database/README.md                          lists every collection and index
+--   backend/seed.js                             adds the demo data
+--
+-- Create the database from scratch (set MONGODB_URI in backend/.env first):
+--   npm run db:schema    collections and indexes only
+--   npm run db:setup     collections, indexes and demo data
+--
+-- Both commands are safe to run again; they never duplicate or delete data.

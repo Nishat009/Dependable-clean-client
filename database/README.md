@@ -1,7 +1,7 @@
 # Database schema
 
 The application uses MongoDB. The complete executable schema is in
-`migrations/001-initial-schema.js`, rather than a SQL file. It creates all ten
+`migrations/001-initial-schema.js`; `schema.sql` is only a pointer note. It creates all ten
 collections and their indexes. Documents remain flexible, matching the existing
 API; no additional document validators or relational foreign keys are imposed.
 

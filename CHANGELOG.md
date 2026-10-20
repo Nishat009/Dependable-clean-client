@@ -8,6 +8,7 @@
 - Booking by service area with a date picker and a booking status workflow.
 - Order reviews with owner approval.
 - `backend/schema.js` creates every collection and index; `npm run db:setup` runs it and the demo seed.
+- `database/` folder: `migrations/001-initial-schema.js` creates the database from scratch, with a collection and index reference in `database/README.md` and a `schema.sql` pointer note (the app uses MongoDB, not SQL).
 - `HowToSetup.md` with clean-machine setup steps, plus `AGENTS.md` and `CLAUDE.md` at the root.
 - API and UI tests (`npm test`).
 
