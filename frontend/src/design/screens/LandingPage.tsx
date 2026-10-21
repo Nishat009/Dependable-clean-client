@@ -4,8 +4,8 @@ import Link from 'next/link';
 import Icon, { type IconName } from '../components/Icon';
 import styles from '../landing.module.css';
 
-// Product landing page for showcases. "Live demo" opens the real app; the demo accounts live on /login.
-const demoUrl = '/home';
+// Product landing page for showcases. "Live demo" opens the sign-in page, which lists the demo accounts.
+const demoUrl = '/login';
 const demoLoginUrl = '/login';
 
 const features: { icon: IconName; title: string; text: string }[] = [
