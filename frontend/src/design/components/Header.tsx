@@ -22,17 +22,17 @@ export default function Header() {
   useEffect(() => setOpen(false), [router.asPath]);
   const current = router.asPath.split(/[?#]/)[0];
   // Only the home hero is dark enough for a transparent header; every other page gets a solid bar.
-  const solid = current !== '/';
+  const solid = current !== '/home';
 
   return <header className={'site-header' + (solid ? ' site-header-solid' : '') + (scrolled ? ' is-scrolled' : '')}>
     <div className="site-header-inner wrap">
       <Brand />
       <nav className={'main-nav' + (open ? ' is-open' : '')} aria-label="Main navigation">
-        <Link href="/" className={current === '/' ? 'active' : ''}>Home</Link>
-        <Link href="/#services" className={current.startsWith('/book') ? 'active' : ''}>Services</Link>
-        <Link href="/#about">About us</Link>
-        <Link href="/#process">Our process</Link>
-        <Link href="/#contact">Contact</Link>
+        <Link href="/home" className={current === '/home' ? 'active' : ''}>Home</Link>
+        <Link href="/home#services" className={current.startsWith('/book') ? 'active' : ''}>Services</Link>
+        <Link href="/home#about">About us</Link>
+        <Link href="/home#process">Our process</Link>
+        <Link href="/home#contact">Contact</Link>
         {user ? <Link href="/dashboard" className="mobile-dashboard-link">Dashboard</Link> : <Link href="/login" className="mobile-dashboard-link">Sign in</Link>}
       </nav>
       <div className="header-actions">

@@ -18,7 +18,7 @@ export default function Footer() {
     <div className="wrap footer-bottom">
       <div><Brand compact /><p>Thoughtful cleaning for spaces worth living in.</p></div>
       <div className="footer-links">
-        <Link href="/#services">Services</Link><Link href="/#about">About</Link><Link href="/#process">Our process</Link><Link href="/login">Sign in</Link>
+        <Link href="/home#services">Services</Link><Link href="/home#about">About</Link><Link href="/home#process">Our process</Link><Link href="/login">Sign in</Link>
       </div>
       <span className="footer-copy">© {new Date().getFullYear()} Dependable Clean</span>
     </div>

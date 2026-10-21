@@ -107,7 +107,7 @@ export default function HeroSlider({ children }: { children?: ReactNode }) {
 
       <div className="hs-actions">
         <ButtonLink href={href}>Book {service?.serviceName || 'this clean'}</ButtonLink>
-        <Link className="text-link" href="/#process">How it works <Icon name="arrow" size={19} /></Link>
+        <Link className="text-link" href="/home#process">How it works <Icon name="arrow" size={19} /></Link>
       </div>
 
       <div className="hs-stage" id="hs-panel" role="tabpanel" aria-labelledby={'hs-tab-' + index} style={{ '--dir': direction } as CSSProperties}

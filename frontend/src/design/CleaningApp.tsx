@@ -43,7 +43,7 @@ function allowed(access: Access, role: Role): boolean {
 // Dashboard screens need a signed-in user. Team screens also need the right role.
 function findRoute(path: string): Route {
   const [, first, second] = path.split('/');
-  if (path === '/') return { access: 'public', render: () => <Home /> };
+  if (path === '/home') return { access: 'public', render: () => <Home /> };
   if (path === '/setup') return { access: 'public', render: () => <SetupPage /> };
   if (path === '/support') return { access: 'support', render: () => <SupportPage /> };
   if (path === '/profile') return { access: 'signedIn', render: () => <ProfilePage /> };

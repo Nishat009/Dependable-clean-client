@@ -42,6 +42,10 @@
 .phone{position:absolute;right:0;bottom:0;width:30%;border:7px solid #1f2420;border-radius:30px;overflow:hidden;background:#000;box-shadow:0 30px 70px #000000a0,0 0 0 1px #ffffff26}
 .phone img{aspect-ratio:9/17;object-fit:cover;object-position:top}
 
+.pill{display:inline-flex;align-items:center;gap:10px;border:1px solid #ffffff26;border-radius:999px;padding:7px 16px 7px 8px;font-size:13px;font-weight:700;color:#dfe6da;background:#ffffff08;margin-bottom:22px}
+.pill b{background:var(--lime);color:var(--ink);border-radius:999px;padding:3px 10px;font-size:11px;letter-spacing:.12em}
+.chips li svg{display:inline;vertical-align:-2px;margin-right:6px;color:var(--lime)}
+
 /* Strip */
 .strip{background:var(--lime);color:var(--ink)}
 .stripGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;padding:30px 0}
@@ -78,6 +82,19 @@
 .screenPhone img{aspect-ratio:9/16;object-fit:cover;object-position:top;border-radius:26px;border:6px solid #1f2420}
 .screens figcaption{margin-top:12px;font-weight:700;font-size:14px;color:var(--muted)}
 
+/* Rules, tour, checklist */
+.rules{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;list-style:none;padding:0;margin:0}
+.rules li{display:flex;gap:10px;align-items:flex-start;border:1px solid #ffffff1f;border-radius:14px;padding:18px;font-weight:700;font-size:15px;line-height:1.4;background:#ffffff06}
+.rules li svg{flex:none;color:var(--lime);margin-top:2px}
+.tour{display:grid;grid-template-columns:3fr 3fr 1.2fr 1.2fr;gap:18px;align-items:end}
+.tour figure{margin:0}
+.tour img{border-radius:16px;border:1px solid var(--line);box-shadow:0 24px 50px #1017121a;width:100%}
+.tourPhone img{aspect-ratio:9/16;object-fit:cover;object-position:top;border-radius:24px;border:6px solid #1f2420}
+.tour figcaption{margin-top:12px;font-weight:700;font-size:14px;color:var(--muted)}
+.started{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;list-style:none;padding:0;margin:0 0 32px;text-align:left;width:100%;max-width:900px}
+.started li{border:1px solid #ffffff1f;border-radius:14px;padding:16px;font-weight:700;font-size:15px;background:#ffffff08}
+.started li span{display:block;color:var(--lime);font-size:13px;letter-spacing:.14em;margin-bottom:8px}
+
 /* Tech stack */
 .stackSection{background:var(--charcoal);padding:96px 0}
 .stackGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
@@ -101,6 +118,8 @@
   .featureGrid{grid-template-columns:repeat(2,1fr)}
   .roleGrid{grid-template-columns:repeat(2,1fr)}
   .flow{grid-template-columns:repeat(3,1fr)}
+  .rules,.started{grid-template-columns:repeat(2,1fr)}
+  .tour{grid-template-columns:1fr 1fr}
   .flow li::after{display:none}
 }
 @media (max-width:720px){
@@ -115,6 +134,8 @@
   .featureGrid,.roleGrid,.stackGrid{grid-template-columns:1fr}
   .flow{grid-template-columns:1fr 1fr}
   .screens{grid-template-columns:1fr}
+  .rules,.started,.tour{grid-template-columns:1fr}
+  .tourPhone{max-width:260px}
   .screenPhone{max-width:260px}
   .phone{border-width:5px;border-radius:20px}
 }

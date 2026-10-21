@@ -5,7 +5,7 @@ import Icon, { type IconName } from '../components/Icon';
 import styles from '../landing.module.css';
 
 // Product landing page for showcases. "Live demo" opens the real app; the demo accounts live on /login.
-const demoUrl = '/';
+const demoUrl = '/home';
 const demoLoginUrl = '/login';
 
 const features: { icon: IconName; title: string; text: string }[] = [
@@ -35,6 +35,17 @@ const stack: { group: string; items: string[] }[] = [
   { group: 'Platform', items: ['Role-based access control', 'REST API', 'Responsive UI', 'Vercel + Render'] },
 ];
 
+const rules = ['Bookings open three days ahead', 'Only in areas the business covers', 'One review per finished job', 'Reviews public after owner approval', 'Cancel any time before work starts', 'Staff see only their own jobs', 'Access switched off instantly', 'Every change written to the activity log'];
+
+const tour: { src: string; caption: string; phone?: boolean }[] = [
+  { src: '/landing/home.webp', caption: 'Public website & booking' },
+  { src: '/landing/admin-dashboard.webp', caption: 'Owner dashboard' },
+  { src: '/landing/mobile-home.webp', caption: 'Mobile home', phone: true },
+  { src: '/landing/mobile-dashboard.webp', caption: 'Customer dashboard', phone: true },
+];
+
+const started = ['Open the live demo', 'Pick a demo account', 'Book or manage a clean', 'Watch the job reach Completed'];
+
 function DemoButton({ label = 'Live demo' }: { label?: string }) {
   return <Link href={demoUrl} className={styles.primary}>{label}<Icon name="arrowUp" size={18} /></Link>;
 }
@@ -52,13 +63,15 @@ export default function LandingPage() {
 
     <header className={styles.nav}>
       <div className={styles.wrap + ' ' + styles.navInner}>
-        <Link href="/landing" className={styles.brand} aria-label="Dependable Clean">
+        <Link href="/" className={styles.brand} aria-label="Dependable Clean">
           <span className={styles.brandMark}><Icon name="sparkle" size={20} /></span>
           <span>dependable<span className={styles.dot}>.</span><small>clean</small></span>
         </Link>
         <nav className={styles.navLinks} aria-label="Sections">
           <a href="#features">Features</a>
           <a href="#roles">Roles</a>
+          <a href="#rules">Rules</a>
+          <a href="#tour">Screens</a>
           <a href="#stack">Tech stack</a>
         </nav>
         <DemoButton />
@@ -69,13 +82,16 @@ export default function LandingPage() {
       <section className={styles.hero}>
         <div className={styles.wrap + ' ' + styles.heroGrid}>
           <div className={styles.heroCopy}>
-            <span className={styles.eyebrow}><span className={styles.eyebrowDot} />Cleaning business platform</span>
+            <span className={styles.pill}><b>LIVE</b>Booking, dashboards and support all working</span>
             <h1>Book, manage and deliver every clean <em>in one place.</em></h1>
             <p>Dependable Clean is a full-stack web app for a cleaning business. Customers book cleanings, the owner runs the business, and staff complete the jobs — each with a dashboard built for their role.</p>
             <div className={styles.actions}>
               <DemoButton label="Open live demo" />
               <Link href={demoLoginUrl} className={styles.secondary}>Try a demo account<Icon name="arrow" size={18} /></Link>
             </div>
+            <ul className={styles.chips} aria-label="Highlights">
+              {['Online booking', '4 role dashboards', 'Job tracking', 'Reviews & support'].map((item) => <li key={item}><Icon name="check" size={14} />{item}</li>)}
+            </ul>
             <ul className={styles.chips} aria-label="Built with">
               {['Next.js', 'React', 'TypeScript', 'Express', 'MongoDB'].map((item) => <li key={item}>{item}</li>)}
             </ul>
@@ -142,6 +158,27 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <section id="rules" className={styles.flowSection}>
+        <div className={styles.wrap}>
+          <span className={styles.eyebrow}><span className={styles.eyebrowDot} />Business rules</span>
+          <h2>The rules are built in.</h2>
+          <ul className={styles.rules}>{rules.map((rule) => <li key={rule}><Icon name="check" size={18} />{rule}</li>)}</ul>
+        </div>
+      </section>
+
+      <section id="tour" className={styles.section}>
+        <div className={styles.wrap}>
+          <span className={styles.eyebrowDark}><span className={styles.eyebrowDot} />Product tour</span>
+          <h2>A look at the screens.</h2>
+          <div className={styles.tour}>
+            {tour.map((shot) => <figure key={shot.src} className={shot.phone ? styles.tourPhone : undefined}>
+              <img src={shot.src} alt={shot.caption} loading="lazy" />
+              <figcaption>{shot.caption}</figcaption>
+            </figure>)}
+          </div>
+        </div>
+      </section>
+
       <section id="stack" className={styles.stackSection}>
         <div className={styles.wrap}>
           <span className={styles.eyebrow}><span className={styles.eyebrowDot} />Tech stack</span>
@@ -157,8 +194,9 @@ export default function LandingPage() {
 
       <section className={styles.cta}>
         <div className={styles.wrap + ' ' + styles.ctaInner}>
-          <h2>See it working.</h2>
+          <h2>Run your next clean with Dependable.</h2>
           <p>Open the live app, or sign in with a demo Admin, Staff or Customer account to explore each dashboard.</p>
+          <ol className={styles.started}>{started.map((step, i) => <li key={step}><span>{i + 1}</span>{step}</li>)}</ol>
           <div className={styles.actions}>
             <DemoButton />
             <Link href={demoLoginUrl} className={styles.secondary}>Demo accounts<Icon name="arrow" size={18} /></Link>
