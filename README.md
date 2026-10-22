@@ -1,5 +1,7 @@
 # Dependable Clean
 
+![Dependable Clean: cleaning booking and business management platform](frontend/public/landing/cover.png)
+
 **Live website:** [dependable-clean-client.vercel.app](https://dependable-clean-client.vercel.app/)
 
 Dependable Clean is a website for a cleaning business. Customers book a cleaning, the owner manages the business, and staff go out and do the jobs. Everyone signs in and lands on the same dashboard, but each person only sees what their role allows.
