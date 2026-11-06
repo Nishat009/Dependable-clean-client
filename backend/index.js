@@ -1,11 +1,11 @@
-const config = require('./config');
-const { connect, ensureIndexes } = require('./db');
-const { ensureDemoAccounts } = require('./demoAccounts');
-const { createApp } = require('./app');
-
 // Starts the API: config.js checks the settings, then the database opens, demo accounts are made when allowed, and the app listens.
 // The routes live in routes/*.js; docs/ROUTES.md lists every one with its guard.
 async function start() {
+  // Required inside start(), so a settings problem (such as a missing AUTH_SECRET) is printed as one clear line.
+  const config = require('./config');
+  const { connect, ensureIndexes } = require('./db');
+  const { ensureDemoAccounts } = require('./demoAccounts');
+  const { createApp } = require('./app');
   const db = await connect(config);
   await ensureIndexes(db);
   if (config.demoEnabled) {
@@ -16,6 +16,6 @@ async function start() {
 }
 
 start().catch((error) => {
-  console.error(error.message);
+  console.error('API did not start: ' + error.message);
   process.exitCode = 1;
 });
