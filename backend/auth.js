@@ -1,17 +1,8 @@
 const crypto = require('node:crypto');
 
+// Read lazily so scripts like setup-owner can hash passwords without the API's startup checks.
+const secret = () => require('./config').authSecret;
 const tokenLifetimeMs = 7 * 24 * 60 * 60 * 1000;
-const secret = process.env.AUTH_SECRET || crypto.randomBytes(32).toString('hex');
-if (!process.env.AUTH_SECRET && process.env.NODE_ENV === 'production') {
-  console.warn('AUTH_SECRET is not set, so everyone is signed out whenever the API restarts.');
-}
-
-// The demo buttons on the sign-in page use these accounts. The API creates them when it starts, with their team role.
-const demoAccounts = {
-  admin: { name: 'Alex Morgan', email: 'admin@dependableclean.demo', password: 'demo-admin-123', role: 'superAdmin' },
-  staff: { name: 'Sam Chowdhury', email: 'staff@dependableclean.demo', password: 'demo-staff-123', role: 'staff' },
-  customer: { name: 'Jamie Rivera', email: 'customer@dependableclean.demo', password: 'demo-customer-123' }
-};
 
 function hashPassword(password) {
   const salt = crypto.randomBytes(16).toString('hex');
@@ -26,13 +17,16 @@ function verifyPassword(password, stored) {
   return expected.length === actual.length && crypto.timingSafeEqual(expected, actual);
 }
 
-const sign = (payload) => crypto.createHmac('sha256', secret).update(payload).digest('base64url');
+const sign = (payload) => crypto.createHmac('sha256', secret()).update(payload).digest('base64url');
 
-function createToken(email) {
-  const payload = Buffer.from(JSON.stringify({ email, exp: Date.now() + tokenLifetimeMs })).toString('base64url');
+// The token carries the user's tokenVersion. Raising it (password change, deactivation, sign-out everywhere)
+// revokes every token issued before, because requireUser compares it with the database on each request.
+function createToken(user) {
+  const payload = Buffer.from(JSON.stringify({ email: user.email, v: user.tokenVersion || 0, exp: Date.now() + tokenLifetimeMs })).toString('base64url');
   return payload + '.' + sign(payload);
 }
 
+// Returns { email, version } for a valid, unexpired token, otherwise null.
 function readToken(header) {
   const [payload, signature] = String(header || '').replace(/^Bearer\s+/i, '').split('.');
   if (!payload || !signature) return null;
@@ -40,11 +34,13 @@ function readToken(header) {
   const actual = Buffer.from(signature);
   if (expected.length !== actual.length || !crypto.timingSafeEqual(expected, actual)) return null;
   try {
-    const { email, exp } = JSON.parse(Buffer.from(payload, 'base64url').toString());
-    return email && exp > Date.now() ? email : null;
+    const { email, v, exp } = JSON.parse(Buffer.from(payload, 'base64url').toString());
+    return typeof email === 'string' && exp > Date.now() ? { email, version: Number(v) || 0 } : null;
   } catch {
     return null;
   }
 }
 
-module.exports = { demoAccounts, hashPassword, verifyPassword, createToken, readToken };
+const randomPassword = () => crypto.randomBytes(32).toString('base64url');
+
+module.exports = { hashPassword, verifyPassword, createToken, readToken, randomPassword };

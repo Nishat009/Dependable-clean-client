@@ -6,4 +6,4 @@ From the combined `Dependable-clean` folder, run `npm install` once and then `np
 
 To run the client on its own, run `npm install` and `npm run dev` in this folder. The client calls the API at `http://localhost:5000` unless `NEXT_PUBLIC_API_URL` is set.
 
-The home page hero is a product slider: each slide pairs a service with a cleaning product drawn in `src/design/Products.js`. Slide and offer content is in `src/design/data.js`, and the slider styles are split across `src/design/products.css`, `carousel.css` and `hero-slider.css`, with layout fixes in `responsive.css`.
+The home page hero is a product slider: each slide pairs a service with a cleaning product drawn by `src/design/components/Product.tsx`, and the slider itself is `src/design/components/HeroSlider.tsx`. Slide and offer content is in `src/design/data.ts`, and the slider styles are split across `src/design/products.css`, `carousel.css` and `hero-slider.css`, with layout fixes in `responsive.css`.

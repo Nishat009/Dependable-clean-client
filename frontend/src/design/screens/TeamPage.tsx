@@ -10,6 +10,7 @@ import Select from '../components/Select';
 import ConfirmModal from '../components/ConfirmModal';
 import Notice from '../components/Notice';
 import type { Role, TeamMember } from '../types';
+import { emailProblem, nameProblem, passwordProblem } from '../validators';
 
 type NewMember = { name: string; email: string; password: string; role: 'staff' | 'sub_admin' };
 const emptyMember: NewMember = { name: '', email: '', password: '', role: 'staff' };
@@ -19,23 +20,6 @@ const roleOptions = [
 ];
 const roleLabels: Partial<Record<Role, string>> = { super_admin: 'Owner', sub_admin: 'Sub admin', staff: 'Staff' };
 const isTeamRole = (role?: Role) => role === 'staff' || role === 'sub_admin';
-
-// Checked here before sending, so mistakes show under the field instead of coming back from the server.
-// The email rule is stricter than the browser's own, which accepts addresses without a domain ending such as "a@b".
-const nameProblem = (name: string) => {
-    const value = name.trim();
-    if (!value) return 'Enter their name.';
-    if (value.includes('@')) return 'Enter their name here, not an email address.';
-    if (!/\p{L}/u.test(value)) return 'A name needs at least one letter.';
-    if (value.length < 2) return 'Enter their full name.';
-    return '';
-};
-const emailProblem = (email: string) => {
-    const value = email.trim();
-    if (!value) return 'Enter their email address.';
-    return /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)*\.[a-z]{2,}$/i.test(value) ? '' : 'Enter a full email address, like name@example.com.';
-};
-const passwordProblem = (password: string) => !password ? 'Set a password for them.' : password.length < 12 ? `Use at least 12 characters (${password.length} so far).` : password.length > 200 ? 'Use 200 characters or fewer.' : '';
 
 export default function TeamPage() {
     const remote = useRemote<TeamMember[]>('/admin', []);

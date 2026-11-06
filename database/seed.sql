@@ -1,12 +1,12 @@
--- Dependable Clean demo data
+-- Dependable Clean demo data (DOCUMENTATION ONLY: the app seeds MongoDB with backend/seed.js)
 --
 -- The same demo data that backend/seed.js adds to MongoDB (npm run db:setup), as SQL
 -- INSERT statements for the tables in database/schema.sql. backend/seed.js is the seed
 -- the app uses; the data comes from backend/sampleData.js.
 --
 -- The three demo sign-in accounts (owner, staff, customer) are not inserted here. The API
--- creates them, with hashed passwords, when it starts with DEMO_ACCOUNTS on. Their emails
--- and passwords are listed in HowToSetup.md.
+-- creates them with random passwords when it starts with DEMO_ACCOUNTS on; they open only
+-- through the demo buttons on the sign-in page (POST /demoLogin).
 
 -- Services (ids match the frontend's demo services).
 INSERT INTO service (id, serviceName, price, category, duration, teamSize, idealFor, details, includes, suppliesIncluded, active) VALUES

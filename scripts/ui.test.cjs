@@ -44,7 +44,8 @@ test('every role redirects to /dashboard after login, ignoring from query', () =
         const Login = load('frontend/src/design/screens/LoginPage.tsx', {
             react: { ...React, useEffect: fn => fn() }, 'next/router': { useRouter: () => ({ query: { from: '//evil.example' }, replace: path => redirects.push(path) }) },
             '../Auth': { useAuth: () => ({ user: { name: 'Test', role } }) }, '../hooks/useRemote': { useRemote: () => ({data: {demoEnabled:false}}) },
-            '../api': { errorMessage: String }, '../components/Icon': () => null, '../components/Notice': () => null, '../components/PasswordInput': () => null
+            '../api': { errorMessage: String }, '../components/Icon': () => null, '../components/Notice': () => null, '../components/PasswordInput': () => null,
+            '../validators': loadModule('frontend/src/design/validators.ts')
         });
         renderToStaticMarkup(React.createElement(Login));
         assert.deepEqual(redirects, ['/dashboard']);

@@ -1,7 +1,10 @@
--- Dependable Clean database schema
+-- Dependable Clean database schema (DOCUMENTATION ONLY: the app never reads this file)
+--
+-- backend/test/security.test.js checks that the tables and indexes here match database/migrations,
+-- so this copy cannot drift from the real schema.
 --
 -- The app runs on MongoDB. The schema it actually runs is
--- database/migrations/001-initial-schema.js (npm run db:schema). This file describes the
+-- database/migrations/ (001 and 002, run by npm run db:schema). This file describes the
 -- same 10 collections and indexes as SQL tables, so the data model can be read and
 -- reviewed in one place. It is plain SQL written for PostgreSQL and checked to load in SQLite.
 --
@@ -21,7 +24,8 @@ CREATE TABLE "user" (
   invited       BOOLEAN      DEFAULT FALSE,  -- TRUE until the invited member sets a password
   setupHash     VARCHAR(200),                -- hash of the one-time account setup link
   setupExpires  BIGINT       DEFAULT 0,      -- setup link expiry, milliseconds since 1970
-  demo          BOOLEAN      DEFAULT FALSE,  -- demo sign-in accounts
+  demo          BOOLEAN      DEFAULT FALSE,  -- demo sign-in accounts (random password, open only through /demoLogin)
+  tokenVersion  INTEGER      DEFAULT 0,      -- raised to revoke every sign-in token issued before
   createdAt     TIMESTAMP    NOT NULL
 );
 CREATE UNIQUE INDEX user_email ON "user" (email);
@@ -88,6 +92,11 @@ CREATE TABLE book (
 CREATE INDEX book_email ON book (email);
 CREATE INDEX book_staffEmail ON book (staffEmail);
 CREATE INDEX book_status ON book (status);
+-- Added by migration 002.
+CREATE INDEX book_email_createdAt ON book (email, createdAt DESC);
+CREATE INDEX book_staffEmail_status ON book (staffEmail, status);
+CREATE INDEX book_serviceId ON book (serviceId);
+CREATE INDEX book_locationId ON book (locationId);
 
 -- Customer reviews. One review per completed booking; the owner approves them.
 CREATE TABLE review (
@@ -102,6 +111,8 @@ CREATE TABLE review (
   createdAt  TIMESTAMP
 );
 CREATE UNIQUE INDEX review_orderId ON review (orderId) WHERE orderId IS NOT NULL;
+CREATE INDEX review_status ON review (status);
+CREATE INDEX review_email ON review (email);
 
 -- Customer support conversations, one per customer.
 CREATE TABLE conversation (
@@ -114,6 +125,7 @@ CREATE TABLE conversation (
   createdAt   TIMESTAMP    NOT NULL           -- time of the latest message
 );
 CREATE UNIQUE INDEX conversation_email ON conversation (email);
+CREATE INDEX conversation_staffEmail ON conversation (staffEmail);
 
 -- Support messages.
 CREATE TABLE message (
@@ -126,6 +138,7 @@ CREATE TABLE message (
   createdAt       TIMESTAMP     NOT NULL
 );
 CREATE INDEX message_conversationId ON message (conversationId);
+CREATE INDEX message_conversationId_createdAt ON message (conversationId, createdAt);
 
 -- Log of team changes.
 CREATE TABLE activity (

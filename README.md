@@ -2,7 +2,9 @@
 
 ![Dependable Clean: cleaning booking and business management platform](frontend/public/landing/cover.png)
 
-**Live website:** [dependable-clean-client.vercel.app](https://dependable-clean-client.vercel.app/)
+**Live website:** [dependable-clean-client.vercel.app](https://dependable-clean-client.vercel.app/) · **Live API:** [dependable-clean-client.onrender.com/health](https://dependable-clean-client.onrender.com/health)
+
+The live site is a public demo with no real customer data. On the sign-in page, the **Admin**, **Staff** and **Customer** demo buttons open each role (the free API host may take up to a minute to wake). `npm run check:live` signs in as each demo role against the live API and loads its dashboard.
 
 Dependable Clean is a website for a cleaning business. Customers book a cleaning, the owner manages the business, and staff go out and do the jobs. Everyone signs in and lands on the same dashboard, but each person only sees what their role allows.
 
@@ -53,28 +55,50 @@ A booking can be cancelled any time before the work starts.
 
 ## Run it on your computer
 
+Needs Node.js 20.13+ (see `.nvmrc`). Full steps are in [HowToSetup.md](HowToSetup.md).
+
+**Quick look, no database:**
+
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
 - Website: http://localhost:3000
 - API: http://localhost:5000
 
-Without a database, the app runs with temporary test data that is wiped on restart. Demo **Admin**, **Staff** and **Customer** sign-in buttons appear in local development so you can try each role (set `DEMO_ACCOUNTS=off` to hide them).
+Without `MONGODB_URI`, the API runs on temporary sample data that is wiped on restart. Demo **Admin**, **Staff** and **Customer** sign-in buttons appear in local development so you can try each role (set `DEMO_ACCOUNTS=off` to hide them).
 
-To keep data, copy `backend/.env.example` to `backend/.env` and fill in `MONGODB_URI`, `DB_NAME`, `CLIENT_ORIGIN` and a strong `AUTH_SECRET`.
+**With MongoDB (keeps data):**
+
+```bash
+npm ci
+cp backend/.env.example backend/.env          # set MONGODB_URI, DB_NAME, CLIENT_ORIGIN and AUTH_SECRET
+cp frontend/.env.example frontend/.env.local  # NEXT_PUBLIC_API_URL, default http://localhost:5000
+npm run db:setup                              # runs the migrations and adds the demo data
+npm run dev
+```
 
 ## First-time owner setup
 
 1. Put `OWNER_EMAIL` and `OWNER_NAME` in the backend `.env`.
-2. Run `npm run setup-owner --workspace @dependable-clean/server`.
+2. Run `npm run setup-owner`.
 3. Open the link it prints (valid for 24 hours) and choose a password.
 4. From the dashboard, add service areas, services and prices, your business contact info, and your team.
 
 The business timezone and currency default to `Asia/Dhaka` and `BDT` (change with `BUSINESS_TIMEZONE` and `BUSINESS_CURRENCY`). Don't change the currency after real bookings exist, because old prices are not converted.
 
+## Security
+
+- Every create, update and delete route has a role guard; [docs/ROUTES.md](docs/ROUTES.md) lists every route with its guard and is checked by the tests.
+- Lookups by id are scoped to the owner, the assigned staff member or an admin inside the database query.
+- Passwords are scrypt hashes; tokens are HMAC-signed and can be revoked. Production refuses to start without a strong `AUTH_SECRET`.
+- Sign-in endpoints are rate limited, request bodies are capped at 100 KB, and MongoDB operator keys (`$ne`, `$gt`, ...) are rejected.
+- Demo accounts have no fixed password and are off in production unless `DEMO_ACCOUNTS=on`.
+
 ## Checks
 
-- `npm test` – runs the automated tests (they never touch real data or contact real people).
-- `npm run build` – builds the website and checks for type errors.
+- `npm test` – API, security and UI tests (they never touch real data or contact real people).
+- `npm run build` – builds the website with type checks and syntax-checks the API.
+- `npm audit --omit=dev` – 0 known vulnerabilities at the time of the last release (see [CHANGELOG.md](CHANGELOG.md)).
+- `npm run check:live` – end-to-end check of the deployed demo.

@@ -1,6 +1,6 @@
-const { up } = require('../database/migrations/001-initial-schema');
+const { upAll } = require('../database/migrations');
 const { MongoClient } = require('mongodb');
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 
 if (process.env.DNS_SERVERS) require('node:dns').setServers(process.env.DNS_SERVERS.split(',').map((server) => server.trim()));
 
@@ -11,7 +11,7 @@ async function createSchema() {
   await client.connect();
   try {
     const db = client.db(process.env.DB_NAME || 'houseCleaning');
-    await up(db);
+    await upAll(db);
   } finally {
     await client.close();
   }

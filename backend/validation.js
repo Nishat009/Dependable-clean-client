@@ -4,8 +4,11 @@ const bookingStatuses = ['requested', 'confirmed', 'assigned', 'in_progress', 'c
 const reviewStatuses = ['Pending', 'Approved', 'Rejected', 'Hidden'];
 
 const text = (value, max = 2000) => String(value ?? '').trim().slice(0, max);
-const normalizeEmail = (value) => String(value || '').trim().toLowerCase();
+// Only strings are accepted, so an object such as { "$ne": null } can never become a query value.
+const normalizeEmail = (value) => typeof value === 'string' ? value.trim().toLowerCase().slice(0, 150) : '';
 const isEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+const password = (value) => typeof value === 'string' ? value : '';
+const passwordProblem = (value) => value.length < 12 || value.length > 200 ? 'Use a password of 12–200 characters.' : '';
 
 // Calendar days in the configured business timezone, independent of the server timezone.
 function earliestBookingDate(now = Date.now()) {
@@ -41,4 +44,4 @@ function readService(body) {
 const byId = (a, b) => String(a._id).localeCompare(String(b._id));
 const newestFirst = (a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')) || String(b._id).localeCompare(String(a._id));
 
-module.exports = { BOOKING_LEAD_DAYS, bookingStatuses, reviewStatuses, text, normalizeEmail, isEmail, earliestBookingDate, isIsoDate, readService, byId, newestFirst };
+module.exports = { BOOKING_LEAD_DAYS, bookingStatuses, reviewStatuses, text, normalizeEmail, isEmail, password, passwordProblem, earliestBookingDate, isIsoDate, readService, byId, newestFirst };

@@ -7,11 +7,13 @@ import Icon from '../components/Icon';
 import Notice from '../components/Notice';
 import PasswordInput from '../components/PasswordInput';
 import type { Role } from '../types';
+import { emailProblem, nameProblem, passwordProblem } from '../validators';
 
-const demos: { role: Role; label: string; email: string; password: string }[] = [
-  { role: 'staff', label: 'Staff', email: 'staff@dependableclean.demo', password: 'demo-staff-123' },
-  { role: 'customer', label: 'Customer', email: 'customer@dependableclean.demo', password: 'demo-customer-123' },
-  { role: 'admin', label: 'Admin', email: 'admin@dependableclean.demo', password: 'demo-admin-123' },
+// Demo sign-in goes through /demoLogin by role only, so no demo credentials live in the client.
+const demos: { role: Role; label: string; description: string }[] = [
+  { role: 'staff', label: 'Staff', description: 'Assigned jobs' },
+  { role: 'customer', label: 'Customer', description: 'Book and track cleans' },
+  { role: 'admin', label: 'Admin', description: 'Owner dashboard' },
 ];
 
 type Mode = 'signin' | 'signup';
@@ -19,8 +21,7 @@ type Busy = '' | 'form' | Role;
 
 export default function LoginPage() {
   const router = useRouter();
-  const demoOptions = useRemote<{demoEnabled:boolean}>('/authOptions',{demoEnabled:false});
-  const { data: authOptions } = demoOptions;
+  const { data: authOptions } = useRemote<{demoEnabled:boolean}>('/authOptions',{demoEnabled:false});
   const { user, signIn, signUp, signInDemo } = useAuth();
   const [mode, setMode] = useState<Mode>('signin');
   const [name, setName] = useState('');
@@ -40,7 +41,9 @@ export default function LoginPage() {
   }
   function submit(event: FormEvent) {
     event.preventDefault();
-    run(() => signingUp ? signUp({ name, email, password }) : signIn({ email, password }), 'form');
+    const problem = signingUp && (nameProblem(name, true) || emailProblem(email, true) || passwordProblem(password, true));
+    if (problem) { setError(problem); return; }
+    run(() => signingUp ? signUp({ name: name.trim(), email: email.trim(), password }) : signIn({ email, password }), 'form');
   }
   function switchMode(next: Mode) { setMode(next); setError(''); }
 
@@ -69,10 +72,10 @@ export default function LoginPage() {
         </button>
       </form>
       <p className="auth-switch">{signingUp ? 'Already have an account? ' : 'New to Dependable Clean? '}<button type="button" onClick={() => switchMode(signingUp ? 'signin' : 'signup')}>{signingUp ? 'Sign in' : 'Create an account'}</button></p>
-      {(authOptions.demoEnabled || demoOptions.loading) && <div className="demo-login">
+      {authOptions.demoEnabled && <div className="demo-login">
         <span>TRY A DEMO ACCOUNT</span>
         {demos.map((demo) => <button key={demo.role} type="button" disabled={Boolean(busy)} onClick={() => run(() => signInDemo(demo.role), demo.role)}>
-          <span className="demo-login-details"><strong>Demo {demo.label}</strong><small>Email: {demo.email}</small><small>Password: {demo.password}</small></span>
+          <span className="demo-login-details"><strong>Demo {demo.label}</strong><small>{demo.description}</small></span>
           <span className="demo-login-action">{busy === demo.role ? `Opening the ${demo.label} demo…` : 'Open demo'} <Icon name="arrow" size={17} /></span>
         </button>)}
       </div>}

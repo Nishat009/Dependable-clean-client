@@ -18,6 +18,7 @@ services:
         sync: false
       - key: CLIENT_ORIGIN
         sync: false
+      # This deployment is the public demo, with no real customer data. Leave DEMO_ACCOUNTS out for a real launch.
       - key: DEMO_ACCOUNTS
         value: "on"
       - key: AUTH_SECRET

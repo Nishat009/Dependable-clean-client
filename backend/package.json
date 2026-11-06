@@ -1,24 +1,27 @@
 {
   "name": "@dependable-clean/server",
-  "version": "2.0.0",
+  "version": "1.5.0",
   "private": true,
   "main": "index.js",
   "scripts": {
     "dev": "node --watch index.js",
-    "start-dev": "node --watch index.js",
     "start": "node index.js",
-    "build": "node --check index.js && node --check auth.js && node --check demoDb.js && node --check validation.js && node --check sampleData.js && node --check seed.js && node --check permissions.js && node --check management.js && node --check setup-owner.js && node --check schema.js",
+    "build": "node scripts/check-syntax.js",
     "db:schema": "node schema.js",
     "seed": "node seed.js",
     "db:setup": "node schema.js && node seed.js",
-    "test": "node --test management.test.js",
-    "setup-owner": "node setup-owner.js"
+    "test": "node --test test/*.test.js",
+    "setup-owner": "node setup-owner.js",
+    "docs:routes": "node scripts/routes-doc.js"
   },
   "dependencies": {
-    "cors": "^2.8.5",
-    "dotenv": "^16.6.1",
-    "express": "^5.1.0",
-    "express-fileupload": "^1.5.2",
-    "mongodb": "^6.20.0"
+    "cors": "2.8.6",
+    "dotenv": "17.4.2",
+    "express": "5.2.1",
+    "express-rate-limit": "8.7.3",
+    "mongodb": "6.21.0"
+  },
+  "engines": {
+    "node": ">=20.13.0"
   }
 }

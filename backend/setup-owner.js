@@ -2,7 +2,7 @@ const { MongoClient } = require('mongodb');
 const crypto = require('node:crypto');
 const { hashPassword } = require('./auth');
 const { normalizeEmail, isEmail, text } = require('./validation');
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 async function main() {
     const email = normalizeEmail(process.env.OWNER_EMAIL), name = text(process.env.OWNER_NAME, 80);
     if (!process.env.MONGODB_URI || !isEmail(email) || !name)

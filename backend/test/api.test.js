@@ -2,8 +2,8 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { spawn } = require('node:child_process');
 const { once } = require('node:events');
-const { earliestBookingDate, isIsoDate } = require('./validation');
-const { can, normalizeStatus, transitions } = require('./permissions');
+const { earliestBookingDate, isIsoDate } = require('../validation');
+const { can, normalizeStatus, transitions } = require('../permissions');
 const port = 5197, base = `http://127.0.0.1:${port}`;
 async function request(path, token, method = 'GET', body) {
     const response = await fetch(base + path, { method, headers: { 'content-type': 'application/json', ...(token ? { authorization: 'Bearer ' + token } : {}) }, body: body === undefined ? undefined : JSON.stringify(body) });
@@ -18,7 +18,7 @@ test('business calendar and permission rules', () => {
     assert.deepEqual(transitions.assigned, ['in_progress', 'cancelled']);
 });
 test('direct API role, ownership and workflow verification', async (t) => {
-    const server = spawn(process.execPath, ['backend/index.js'], { cwd: require('node:path').resolve(__dirname, '..'), env: { ...process.env, PORT: String(port), NODE_ENV: 'test', MONGODB_URI: '', DB_USER: '', DB_PASS: '', DEMO_ACCOUNTS: 'on' } });
+    const server = spawn(process.execPath, [require('node:path').resolve(__dirname, '../index.js')], { env: { ...process.env, PORT: String(port), NODE_ENV: 'test', MONGODB_URI: '', DEMO_ACCOUNTS: 'on', AUTH_SECRET: '' } });
     let output = '';
     server.stdout.on('data', d => output += d);
     server.stderr.on('data', d => { output += d; process.stderr.write(d); });
