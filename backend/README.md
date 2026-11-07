@@ -1,6 +1,6 @@
 # API
 
-Express 5 and MongoDB. Setup steps are in [HowToSetup.md](../HowToSetup.md); every route and its guard is in [docs/ROUTES.md](../docs/ROUTES.md).
+Express 5.2.1 and the MongoDB Node.js driver 6.21.0 (pinned in `package.json`). Setup steps are in [HowToSetup.md](../HowToSetup.md); every route and its guard is in [docs/ROUTES.md](../docs/ROUTES.md).
 
 ## Layout
 

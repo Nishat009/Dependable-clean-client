@@ -5,6 +5,20 @@ These steps take a clean machine to a running app. The project has two parts in 
 - `frontend/` – the website (Next.js, React, TypeScript)
 - `backend/` – the API (Node.js, Express, MongoDB)
 
+Versions: Node.js 20.13+ (22 recommended), Next.js 16.4.5, React 19.3.0, Express 5.2.1, MongoDB Node.js driver 6.21.0, MongoDB server 6.0+ or Atlas.
+
+**In short, in this order** (each step is explained below):
+
+```bash
+npm ci                                         # 2. install exact versions from package-lock.json
+cp backend/.env.example backend/.env           # 3. then set MONGODB_URI and AUTH_SECRET
+cp frontend/.env.example frontend/.env.local   # 4.
+npm run db:setup                               # 5. collections, indexes, validators, demo data
+npm run dev                                    # 6. website :3000, API :5000
+```
+
+`AUTH_SECRET` (32+ random characters) is optional in development but **required in production**: with `NODE_ENV=production` the API refuses to start without it.
+
 ## 1. Install the tools
 
 - **Node.js 20.13 or newer** (22 LTS recommended, pinned in `.nvmrc`) – https://nodejs.org. npm 10 or newer comes with it.
@@ -112,7 +126,7 @@ If `MONGODB_URI` is left empty, `npm run dev` still starts, using temporary in-m
 
 ## Production
 
-- API: deploy `backend/` (see `render.yaml`) with `npm ci`. Set `NODE_ENV=production`, `MONGODB_URI`, `CLIENT_ORIGIN` (the website URL) and a strong `AUTH_SECRET`. Leave `DEMO_ACCOUNTS` out for a real launch; set `DEMO_ACCOUNTS=on` only on a demo deployment with its own database and no real customer data.
+- API: deploy `backend/` (see `render.yaml`): Root Directory `backend`, build command `npm install --omit=dev`, start command `npm start`. (`npm ci` cannot run inside `backend/` because the only lockfile is the root one.) Set `NODE_ENV=production`, `MONGODB_URI`, `CLIENT_ORIGIN` (the website URL) and a strong `AUTH_SECRET`. Leave `DEMO_ACCOUNTS` out for a real launch; set `DEMO_ACCOUNTS=on` only on a demo deployment with its own database and no real customer data.
 - Run `npm run db:schema` against the production database once, and again after updating, to apply new migrations.
 - Website: deploy `frontend/` (e.g. Vercel) with `NEXT_PUBLIC_API_URL` set to the API URL.
 - Check the deployment with `npm run check:live` (set `LIVE_SITE_URL` and `LIVE_API_URL` for your own URLs). It signs in as each demo role and loads its dashboard.
@@ -127,3 +141,5 @@ npm run package
 ```
 
 This writes `dependable-clean.zip` from the committed files only, so `node_modules`, `.next`, `.env` and `.git` are never included.
+
+This needs `git` and a git checkout with at least one commit. In a folder that came from a downloaded ZIP (no `.git`), `npm run package` stops with a message saying so. Run `git init && git add -A && git commit -m "Import"` first, or zip the folder yourself without `node_modules`, `frontend/.next`, `backend/.env` and `frontend/.env.local`.

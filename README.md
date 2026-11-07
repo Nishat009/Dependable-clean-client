@@ -53,6 +53,19 @@ The people who book cleanings. They can:
 
 A booking can be cancelled any time before the work starts.
 
+## Stack
+
+Exact versions pinned in the `package.json` files and the root `package-lock.json` (a test fails if this table drifts from them):
+
+| Part | Version |
+| --- | --- |
+| Node.js | 20.13+ (22 in `.nvmrc` and on Render) |
+| Next.js | 16.4.5 |
+| React | 19.3.0 |
+| TypeScript | 5.9.3 |
+| Express | 5.2.1 |
+| MongoDB Node.js driver | 6.21.0 (server: MongoDB 6.0+ or Atlas) |
+
 ## Run it on your computer
 
 Needs Node.js 20.13+ (see `.nvmrc`). Full steps are in [HowToSetup.md](HowToSetup.md).

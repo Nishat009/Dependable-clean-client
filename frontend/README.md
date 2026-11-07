@@ -1,6 +1,6 @@
 # Dependable Clean Client
 
-This client runs on Next.js 16 and React 19. The current UI lives in `src/design`.
+This client runs on Next.js 16.4.5 and React 19.3.0 (pinned in `package.json`). The current UI lives in `src/design`.
 
 From the combined `Dependable-clean` folder, run `npm install` once and then `npm run dev` to start both the client and API. The client uses port 3000. See the parent README for server environment setup.
 

@@ -13,10 +13,10 @@
     "dev": "concurrently -k -n frontend,backend -c cyan,green \"npm --workspace @dependable-clean/client run dev\" \"npm --workspace @dependable-clean/server run dev\"",
     "build": "npm run build --workspaces --if-present",
     "start": "concurrently -k -n frontend,backend -c cyan,green \"npm --workspace @dependable-clean/client run start\" \"npm --workspace @dependable-clean/server run start\"",
-    "test": "node --test backend/test/*.test.js scripts/ui.test.cjs",
+    "test": "node --test backend/test/*.test.js scripts/ui.test.cjs scripts/docs.test.cjs",
     "db:schema": "npm --workspace @dependable-clean/server run db:schema",
     "db:setup": "npm --workspace @dependable-clean/server run db:setup",
-    "package": "git archive --format=zip -o dependable-clean.zip HEAD",
+    "package": "node scripts/package.cjs",
     "check:live": "node scripts/check-live-demo.cjs",
     "setup-owner": "npm --workspace @dependable-clean/server run setup-owner",
     "docs:routes": "npm --workspace @dependable-clean/server run docs:routes"
